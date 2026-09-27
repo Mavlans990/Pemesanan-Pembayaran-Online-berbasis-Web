@@ -1,0 +1,194 @@
+<!-- ================= MAIN ================= -->
+
+<div class="main">
+  <!-- Top Navbar -->
+  <nav class="topbar d-flex align-items-center justify-content-between">
+    <div>
+      <h6 class="mb-0">Meja</h6>
+
+      <small class="text-muted"> Management / Meja </small>
+    </div>
+
+    <!-- User -->
+    <div class="dropdown">
+      <button class="btn btn-light dropdown-toggle" type="button" data-bs-toggle="dropdown">
+        Admin
+      </button>
+
+      <ul class="dropdown-menu dropdown-menu-end">
+        <li>
+          <a class="dropdown-item" href="#"> Profil </a>
+        </li>
+
+        <li>
+          <a class="dropdown-item" href="#"> Pengaturan </a>
+        </li>
+
+        <li>
+          <hr class="dropdown-divider" />
+        </li>
+
+        <li>
+          <a class="dropdown-item text-danger" href="#"> Logout </a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Content -->
+  <main class="content">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <div>
+        <h3 class="fw-semibold mb-1">Meja</h3>
+
+        <p class="text-muted mb-0">Kelola data meja</p>
+      </div>
+
+      <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalTambah">
+        + Tambah Data
+      </button>
+    </div>
+    <% if (msg.length !== 0) { %>
+        <div class="alert alert-danger mt-2" role="alert">
+            <%= msg %>
+        </div>
+    <% } %>
+
+    <!-- Table -->
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <div class="d-flex justify-content-between mb-3">
+          <div>
+            <input type="text" class="form-control" placeholder="Cari Meja..." />
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          <table class="table table-hover align-middle">
+            <thead class="table-light">
+              <tr>
+                <th>No</th>
+                <th>Nama Meja</th>
+                <th>Foto</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% i=1; mejas.forEach(meja =>  {  %>
+              <tr>
+                <td><%= i++ %></td>
+                <td>
+                  <strong><%= meja.nama_meja %></strong>
+                </td>
+                <td>
+                  <a href="<%= meja.path %>">
+                    <img src="<%= meja.path %>" alt="<%= meja.nama_meja %>" width="200">
+                  </a>
+                </td>
+                <td>
+                  <!-- <button class="btn btn-sm btn-warning btn-edit" data-bs-toggle="modal" data-bs-target="#modalEditMeja" 
+                    data-id_meja="<%= meja.id_meja %>"
+                    data-nama_meja="<%= meja.nama_meja %>"
+                    data-foto="<%= meja.foto %>"
+                    data-path="<%= meja.path %>">
+                    Edit
+                  </button> -->
+                  <a href="/meja/delete/<%= meja.id_meja %>" class="btn btn-sm btn-danger" onclick="return confirm('Apakah mau menghapus data ini?')">Hapus</a>
+                </td>
+              </tr>
+              <% }); %>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination -->
+        <nav class="mt-3">
+          <ul class="pagination justify-content-end mb-0">
+            <li class="page-item disabled">
+              <a class="page-link" href="#"> Previous </a>
+            </li>
+
+            <li class="page-item active">
+              <a class="page-link" href="#"> 1 </a>
+            </li>
+
+            <li class="page-item">
+              <a class="page-link" href="#"> 2 </a>
+            </li>
+
+            <li class="page-item">
+              <a class="page-link" href="#"> 3 </a>
+            </li>
+
+            <li class="page-item">
+              <a class="page-link" href="#"> Next </a>
+            </li>
+          </ul>
+        </nav>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- ================= MODAL TAMBAH ================= -->
+
+<div class="modal fade" id="modalTambah" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Tambah Menu</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body">
+        <form method="post" action="meja/add">
+          <div class="mb-3">
+            <label class="form-label"> Nama Meja </label>
+            <input type="text" class="form-control" placeholder="Masukkan nama meja" name="nama_meja" required/>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+              Batal
+            </button>
+    
+            <button type="submit" class="btn btn-primary">Simpan</button>
+          </div>
+        </form>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ================= MODAL EDIT ================= -->
+
+<div class="modal fade" id="modalEditMeja" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Edit Meja</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body">
+        <form method="post" action="meja/edit/0">
+          <input type="hidden" class="form-control" name="id" required/>
+          <input type="hidden" class="form-control" name="oldNama" required/>
+          <div class="mb-3">
+            <label class="form-label"> Nama Meja </label>
+            <input type="text" class="form-control" placeholder="Masukkan nama meja" name="nama_meja" required/>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+              Batal
+            </button>
+    
+            <button type="submit" class="btn btn-primary">Simpan</button>
+          </div>
+        </form>
+      </div>
+
+    </div>
+  </div>
+</div>
