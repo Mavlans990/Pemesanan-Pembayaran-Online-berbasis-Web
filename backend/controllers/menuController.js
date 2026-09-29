@@ -17,10 +17,12 @@ async function list(req, res) {
     }
 }
 
+// Buat fungsi search tanpa load halaman
 async function search(req, res) {
     try {
         const keyword = req.query.q || "";
         const kategori = req.query.kategori || "";
+
         const data = await menuModel.search(keyword, kategori);
 
         res.json({
@@ -39,18 +41,22 @@ async function search(req, res) {
 
 async function add(req, res) {
     try {
-        await menuModel.create(req.body);
+        const foto = req.files && req.files.foto;
+        // console.log(req.files.foto)
+        await menuModel.create(req.body, foto);
         // console.log(req.body)
         res.redirect("/menu");
     } catch (error) {
-        console.error(error);
-        res.status(500).send("Terjadi kesalahan server");
+        console.error(error);req.files
+        res.status(error.status || 500).send(error.message || "Terjadi kesalahan server");
     }
 }
 
 async function edit(req, res) {
     try {
-        await menuModel.update(req.body);
+        const foto = req.files && req.files.foto;
+        // console.log(req.files)
+        await menuModel.update(req.body, foto);
         res.redirect("/menu");
     } catch (error) {
         console.error(error);

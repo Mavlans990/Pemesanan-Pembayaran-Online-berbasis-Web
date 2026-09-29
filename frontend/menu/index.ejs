@@ -74,10 +74,12 @@
                 <th>Kategori</th>
                 <th>Harga</th>
                 <th>Favorit</th>
+                <th>Foto</th>
                 <th>Aksi</th>
               </tr>
             </thead>
 
+            <!-- untuk edit table ada file menu-search.js -->
             <tbody id="menu-tbody">
               <% i=1; menus.forEach(menu =>  {  %>
               
@@ -126,7 +128,7 @@
       </div>
 
       <div class="modal-body">
-        <form method="post" action="menu/add">
+        <form method="post" action="menu/add" enctype="multipart/form-data">
           <div class="mb-3">
             <label class="form-label"> Nama Menu </label>
             <input type="text" class="form-control" placeholder="Masukkan nama menu" name="nama" required/>
@@ -149,24 +151,23 @@
           <div class="mb-3">
             <label class="form-label">Pilih Favorit </label>
             <select class="form-select" name="star">
-              <option value="0">No-Favorit</option>
-              <option value="1">Favorit</option>
+              <option value="0">No-Favorit 🚫</option>
+              <option value="1">Favorit ⭐</option>
             </select>
           </div>
-          
+
           <div class="mb-3">
-            <label class="form-label"> Meja </label>
-            <input type="text" class="form-control" placeholder="Masukkan Meja" name="nama_meja" required/>
+            <label for="formFile" class="form-label">Foto</label>
+            <input class="form-control" type="file" name="foto" id="formFile">
           </div>
 
-          <label class="form-label">Comments</label>
+          <label class="form-label">Deskripsi</label>
           <textarea class="form-control" placeholder="Leave a comment here" id="floatingTextarea2" style="height: 100px" name="deskripsi"></textarea>
           
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
               Batal
             </button>
-    
             <button type="submit" class="btn btn-primary">Simpan</button>
           </div>
         </form>
@@ -187,7 +188,7 @@
       </div>
 
       <div class="modal-body">
-        <form method="post" action="menu/edit/0">
+        <form method="post" action="menu/edit/0" enctype="multipart/form-data">
           <input type="hidden" class="form-control" placeholder="Masukkan nama menu" name="id" required/>
           <input type="hidden" class="form-control" placeholder="Masukkan nama menu" name="oldNama" required/>
           <div class="mb-3">
@@ -212,9 +213,14 @@
           <div class="mb-3">
             <label class="form-label">Pilih Favorit </label>
             <select class="form-select" name="star">
-              <option value="0">No-Favorit</option>
-              <option value="1">Favorit</option>
+              <option value="0">No-Favorit 🚫</option>
+              <option value="1">Favorit ⭐</option>
             </select>
+          </div>
+
+          <div class="mb-3">
+            <label for="formFile" class="form-label">Foto</label>
+            <input class="form-control" type="file" name="foto" id="formFile">
           </div>
 
           <label class="form-label">Comments</label>
@@ -233,3 +239,23 @@
     </div>
   </div>
 </div>
+
+<!-- ================= MODAL DETAIL FOTO ================= -->
+
+<div class="modal fade" id="modalDetailMenu" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Detail Foto</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p id="nama-detail-menu" class="fw-bold mb-2">Nama Menu</p>
+        <img id="foto-detail-menu" class="rounded img-fluid" width="250" alt="Foto menu">
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="/js/menu-search.js"></script>
+<script src="/js/menu-edit.js"></script>

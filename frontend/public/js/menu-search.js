@@ -41,31 +41,39 @@
                 const badgeKategori = menu.kategori === "Makanan" ? "primary" : "dark";
                 const favorit =
                     Number(menu.star) === 1
-                        ? `<span class="badge text-bg-success"> Favorit </span>`
-                        : `<span class="badge text-bg-danger"> No-Favorit </span>`;
+                        ? `<p class="fs-3 mb-0"> ⭐ </p>`
+                        : `<p class="fs-3 mb-0"> 🚫 </p>`;
 
                 return `
-      <tr>
-        <td>${index + 1}</td>
-        <td><strong>${escapeHtml(menu.nama)}</strong></td>
-        <td>
-          <span class="badge text-bg-${badgeKategori}"> ${escapeHtml(menu.kategori)} </span>
-        </td>
-        <td>${escapeHtml(menu.hargaText || menu.harga)}</td>
-        <td>${favorit}</td>
-        <td>
-          <button type="button" class="btn btn-sm btn-warning btn-edit" data-bs-toggle="modal" data-bs-target="#modalEditMenu"
-            data-id_menu="${menu.id_menu}"
-            data-nama="${escapeHtml(menu.nama)}"
-            data-kategori="${escapeHtml(menu.kategori)}"
-            data-harga="${menu.harga}"
-            data-star="${menu.star}"
-            data-deskripsi="${escapeHtml(menu.deskripsi)}">
-            Edit
-          </button>
-          <a href="/menu/delete/${menu.id_menu}" class="btn btn-sm btn-danger" onclick="return confirm('Apakah mau menghapus data ini?')">Hapus</a>
-        </td>
-      </tr>`;
+        <tr>
+            <td>${index + 1}</td>
+            <td><strong>${escapeHtml(menu.nama)}</strong></td>
+            <td>
+                <span class="badge text-bg-${badgeKategori}"> ${escapeHtml(menu.kategori)} </span>
+            </td>
+            <td>${escapeHtml(menu.hargaText || menu.harga)}</td>
+            <td>${favorit}</td>
+            <td>
+                <button type="button" class="btn btn-sm btn-success btn-detail" data-bs-toggle="modal" data-bs-target="#modalDetailMenu"
+                    data-id_menu="${menu.id_menu}"
+                    data-nama="${escapeHtml(menu.nama)}"
+                    data-path="${escapeHtml(menu.path || "")}">
+                    Detail
+                </button>
+            </td>
+            <td>
+                <button type="button" class="btn btn-sm btn-warning btn-edit" data-bs-toggle="modal" data-bs-target="#modalEditMenu"
+                    data-id_menu="${menu.id_menu}"
+                    data-nama="${escapeHtml(menu.nama)}"
+                    data-kategori="${escapeHtml(menu.kategori)}"
+                    data-harga="${menu.harga}"
+                    data-star="${menu.star}"
+                    data-deskripsi="${escapeHtml(menu.deskripsi)}">
+                    Edit
+                </button>
+                <a href="/menu/delete/${menu.id_menu}" class="btn btn-sm btn-danger" onclick="return confirm('Apakah mau menghapus data ini?')">Hapus</a>
+            </td>
+        </tr>`;
             })
             .join("");
     }

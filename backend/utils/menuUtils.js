@@ -3,6 +3,106 @@ const QRCode = require('qrcode')
 const path = require('path');
 const fs = require("fs/promises");
 
+const slug = (text) => {
+    return text.toLowerCase().replace(/\s+/g, '-');
+}
+
+const hashNama = (text) => {
+    return crypto
+        .createHash("sha256")
+        .update(`${text}-${Date.now()}-${Math.random()}`)
+        .digest("hex");
+};
+
+const generateQRCode = async (textQR) => {
+    const qrFolder = path.join(__dirname, "../../frontend/public/img/qrcode");
+    // otomatis buat folder kalau tidak ada folder
+    await fs.mkdir(qrFolder, { recursive: true });
+
+    const foto = `${hashNama(textQR)}.png`;
+    const publicPath = `/img/qrcode/${foto}`;
+    const filePath = path.join(qrFolder, foto);
+
+    try {
+        await QRCode.toFile(filePath, textQR, {
+            type: "png",
+            width: 300,
+            errorCorrectionLevel: "Q", // tingkat toleransi kerusakan: L, M, Q, H
+        });
+
+        console.log('QR Code berhasil disimpan!');
+    } catch (err) {
+        console.error('Gagal membuat QR Code!', err);
+    };
+
+    return { foto, path: publicPath };
+}
+
+const formatRupiah = (angka, withPrefix = true) => {
+    if (angka === null || angka === undefined || isNaN(angka)) {
+        return withPrefix ? 'Rp 0' : '0';
+    }
+
+    // Menggunakan Intl.NumberFormat bawaan JavaScript (Sangat cepat & bersih)
+    const formatted = new Intl.NumberFormat('id-ID', {
+        style: 'decimal',
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+    }).format(angka);
+
+    return withPrefix ? `Rp ${formatted}` : formatted;
+};
+
+const saveMenuFoto = async (foto) => {
+    if (!foto) return { foto: null, path: null };
+
+    const tipeFoto = [".png", ".jpg", ".jpeg", ".webp"];
+    const ext = path.extname(foto.name).toLowerCase();
+    const ukuranFoto = foto.data ? foto.data.length : foto.size;
+
+    if (!tipeFoto.includes(ext)) {
+        const err = new Error("Tipe foto tidak sesuai. Gunakan jpg, jpeg, png, atau webp.");
+        err.status = 400;
+        throw err;
+    }
+
+    if (ukuranFoto > 5 * 1024 * 1024) {
+        const err = new Error("Ukuran foto terlalu besar (maks 5MB).");
+        err.status = 400;
+        throw err;
+    }
+
+    // Path foto untuk menu
+    const menuFotoFolder = path.join(__dirname, "../../frontend/public/img/menu");
+    await fs.mkdir(menuFotoFolder, { recursive: true });
+
+    const unik = crypto.randomBytes(3).toString("hex");
+    const namaFoto = `${unik}${foto.md5 || hashNama(foto.name)}${ext}`;
+    const target = path.join(menuFotoFolder, namaFoto);
+    const publicPath = `/img/menu/${namaFoto}`;
+
+    await foto.mv(target);
+
+    return { foto: namaFoto, path: publicPath };
+};
+
+const deleteFileByPublicPath = async (publicPath) => {
+    if (!publicPath) return;
+
+    const relative = String(publicPath).replace(/^\/+/, "");
+    const filePath = path.join(__dirname, "../../frontend/public", relative);
+
+    try {
+        await fs.unlink(filePath);
+    } catch (err) {
+        if (err.code !== "ENOENT") {
+            console.error("Gagal hapus file:", err);
+        }
+    }
+};
+
+module.exports = { generateQRCode, saveMenuFoto, slug, formatRupiah, deleteFileByPublicPath }
+
 // const addMenu = async (colums) => {
 //     try {
 //         const dataArray = Array.isArray(colums) ? colums : [colums]; //buat cek data masuk 1 atau banyak
@@ -49,70 +149,3 @@ const fs = require("fs/promises");
 //         throw err;
 //     }
 // }
-
-const hashNama = (text) => {
-    return crypto
-        .createHash("sha256")
-        .update(`${text}-${Date.now()}-${Math.random()}`)
-        .digest("hex");
-};
-
-const generateQRCode = async (textQR) => {
-    const qrFolder = path.join(__dirname, "../../frontend/public/img/qrcode");
-    // otomatis buat folder kalau tidak ada folder
-    await fs.mkdir(qrFolder, { recursive: true });
-
-    const foto = `${hashNama(textQR)}.png`;
-    const publicPath = `/img/qrcode/${foto}`;
-    const filePath = path.join(qrFolder, foto);
-
-    try {
-        await QRCode.toFile(filePath, textQR, {
-            type: "png",
-            width: 300,
-            errorCorrectionLevel: "Q", // tingkat toleransi kerusakan: L, M, Q, H
-        });
-
-        console.log('QR Code berhasil disimpan!');
-    } catch (err) {
-        console.error('Gagal membuat QR Code!', err);
-    };
-
-    return { foto, path: publicPath };
-}
-
-const slug = (text) => {
-    return text.toLowerCase().replace(/\s+/g, '-');
-}
-
-const formatRupiah = (angka, withPrefix = true) => {
-    if (angka === null || angka === undefined || isNaN(angka)) {
-        return withPrefix ? 'Rp 0' : '0';
-    }
-
-    // Menggunakan Intl.NumberFormat bawaan JavaScript (Sangat cepat & bersih)
-    const formatted = new Intl.NumberFormat('id-ID', {
-        style: 'decimal',
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 0
-    }).format(angka);
-
-    return withPrefix ? `Rp ${formatted}` : formatted;
-};
-
-const deleteFileByPublicPath = async (publicPath) => {
-    if (!publicPath) return;
-
-    const relative = String(publicPath).replace(/^\/+/, "");
-    const filePath = path.join(__dirname, "../../frontend/public", relative);
-
-    try {
-        await fs.unlink(filePath);
-    } catch (err) {
-        if (err.code !== "ENOENT") {
-            console.error("Gagal hapus file:", err);
-        }
-    }
-};
-
-module.exports = { generateQRCode, slug, formatRupiah, deleteFileByPublicPath }

@@ -1,17 +1,27 @@
 (function () {
-    const modal = document.getElementById("modalEditMenu");
-    if (!modal) return;
+    const modalEdit = document.getElementById("modalEditMenu");
+    const modalDetail = document.getElementById("modalDetailMenu");
 
     document.addEventListener("click", function (e) {
-        const btn = e.target.closest(".btn-edit");
-        if (!btn || !btn.dataset.id_menu) return;
+        const btnEdit = e.target.closest(".btn-edit");
+        
+        if (btnEdit && btnEdit.dataset.id_menu && modalEdit) {
+            isiFormEdit(btnEdit.dataset);
+        }
 
-        const d = btn.dataset;
-        const form = modal.querySelector("form");
+        const btnDetail = e.target.closest(".btn-detail");
+        // console.log(btnDetail)
+        if (btnDetail && modalDetail) {
+            isiFotoDetail(btnDetail.dataset);
+        }
+    });
+
+    function isiFormEdit(d) {
+        const form = modalEdit.querySelector("form");
         if (form) form.action = "/menu/edit/" + d.id_menu;
 
         const setVal = (name, value) => {
-            const el = modal.querySelector('[name="' + name + '"]');
+            const el = modalEdit.querySelector('[name="' + name + '"]');
             if (el) el.value = value ?? "";
         };
 
@@ -23,5 +33,26 @@
         setVal("harga", d.harga);
         setVal("star", d.star);
         setVal("deskripsi", d.deskripsi);
-    });
+    }
+
+    function isiFotoDetail(d) {
+        const img = modalDetail.querySelector("#foto-detail-menu");
+        const judul = modalDetail.querySelector("#nama-detail-menu");
+        const path = d.path;
+        // console.log(img)
+
+        if (judul) judul.textContent = 'Nama Menu : ' + d.nama || "";
+
+        if (!img) return;
+
+        if (path) {
+            img.src = path;
+            img.alt = d.nama || "Foto menu";
+            img.style.display = "";
+        } else {
+            img.removeAttribute("src");
+            img.alt = "Tidak ada foto";
+            img.style.display = "none";
+        }
+    }
 })();
