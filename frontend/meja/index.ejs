@@ -82,8 +82,8 @@
                   <strong><%= meja.nama_meja %></strong>
                 </td>
                 <td>
-                  <a href="<%= meja.path %>">
-                    <img src="<%= meja.path %>" alt="<%= meja.nama_meja %>" width="200">
+                  <a href="<%= apiBase %><%= meja.path %>">
+                    <img src="<%= apiBase %><%= meja.path %>" alt="<%= meja.nama_meja %>" width="200">
                   </a>
                 </td>
                 <td>
@@ -94,7 +94,7 @@
                     data-path="<%= meja.path %>">
                     Edit
                   </button> -->
-                  <a href="/meja/delete/<%= meja.id_meja %>" class="btn btn-sm btn-danger" onclick="return confirm('Apakah mau menghapus data ini?')">Hapus</a>
+                  <a href="<%= apiBase %>/api/meja/delete/<%= meja.id_meja %>" class="btn btn-sm btn-danger" onclick="return confirm('Apakah mau menghapus data ini?')">Hapus</a>
                 </td>
               </tr>
               <% }); %>
@@ -142,7 +142,7 @@
       </div>
 
       <div class="modal-body">
-        <form method="post" action="meja/add">
+        <form method="post" action="<%= apiBase %>/api/meja/add">
           <div class="mb-3">
             <label class="form-label"> Nama Meja </label>
             <input type="text" class="form-control" placeholder="Masukkan nama meja" name="nama_meja" required/>
@@ -172,7 +172,7 @@
       </div>
 
       <div class="modal-body">
-        <form method="post" action="meja/edit/0">
+        <form method="post" action="<%= apiBase %>/api/meja/edit/0">
           <input type="hidden" class="form-control" name="id" required/>
           <input type="hidden" class="form-control" name="oldNama" required/>
           <div class="mb-3">

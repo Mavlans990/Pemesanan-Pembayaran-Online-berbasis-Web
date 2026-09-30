@@ -1,17 +1,22 @@
 const mejaModel = require("../models/mejaModel");
-const flash = require('connect-flash')
+// const flash = require('connect-flash')
+const frontendUrl = process.env.FRONTEND_URL || "http://localhost:3000";
 
+function wantsJson(req) {
+    return req.xhr || (req.headers.accept || "").includes("application/json");
+}
 
 async function list(req, res) {
     try {
         const data = await mejaModel.getAll();
-        res.render("meja/index", {
-            layout: "layouts/main-layout",
-            activePage: "meja",
-            title: "Halaman Dashboard",
-            mejas: data,
-            msg: req.flash('msg')
-        });
+        // res.render("meja/index", {
+        //     layout: "layouts/main-layout",
+        //     activePage: "meja",
+        //     title: "Halaman Dashboard",
+        //     mejas: data,
+        //     msg: req.flash('msg')
+        // });
+        res.json({ success: true, data });
     } catch (error) {
         console.error(error);
         res.status(500).send("Terjadi kesalahan server");
@@ -21,13 +26,21 @@ async function list(req, res) {
 async function add(req, res) {
     try {
         const cekNama = await mejaModel.findOne(req.body.nama_meja);
+        // if (cekNama) {
+        //     req.flash('msg', 'Nama Meja Sudah Ada!')
+        // }else{
+        //     await mejaModel.create(req.body);
+        // }
         if (cekNama) {
-            req.flash('msg', 'Nama Meja Sudah Ada!')
-        }else{
-            await mejaModel.create(req.body);
+            if (wantsJson(req)) {
+                return res.status(400).json({ success: false, message: "Nama Meja Sudah Ada!" });
+            }
+            return res.redirect(frontendUrl + "/meja?error=" + encodeURIComponent("Nama Meja Sudah Ada!"));
         }
+        await mejaModel.create(req.body);
         // console.log(req.body.nama_meja)
-        res.redirect("/meja");
+        if (wantsJson(req)) return res.json({ success: true });
+        res.redirect(frontendUrl + "/meja");
     } catch (error) {
         console.error(error);
         res.status(500).send("Terjadi kesalahan server");
@@ -47,7 +60,8 @@ async function add(req, res) {
 async function remove(req, res) {
     try {
         await mejaModel.remove(req.params.id);
-        res.redirect("/meja");
+        if (wantsJson(req)) return res.json({ success: true });
+        res.redirect(frontendUrl + "/meja");
     } catch (error) {
         console.error(error);
         res.status(500).send("Terjadi kesalahan server");

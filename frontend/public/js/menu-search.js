@@ -57,7 +57,7 @@
                 <button type="button" class="btn btn-sm btn-success btn-detail" data-bs-toggle="modal" data-bs-target="#modalDetailMenu"
                     data-id_menu="${menu.id_menu}"
                     data-nama="${escapeHtml(menu.nama)}"
-                    data-path="${escapeHtml(menu.path || "")}">
+                    data-path="${escapeHtml(menu.path ? (window.API_BASE || "") + menu.path : "")}">
                     Detail
                 </button>
             </td>
@@ -71,7 +71,7 @@
                     data-deskripsi="${escapeHtml(menu.deskripsi)}">
                     Edit
                 </button>
-                <a href="/menu/delete/${menu.id_menu}" class="btn btn-sm btn-danger" onclick="return confirm('Apakah mau menghapus data ini?')">Hapus</a>
+                <a href="${window.API_BASE}/api/menu/delete/${menu.id_menu}" class="btn btn-sm btn-danger" onclick="return confirm('Apakah mau menghapus data ini?')">Hapus</a>
             </td>
         </tr>`;
             })
@@ -85,7 +85,7 @@
         });
 
         try {
-            const res = await fetch("/menu/search?" + params.toString(), {
+            const res = await fetch((window.API_BASE || "") + "/api/menu/search?" + params.toString(), {
                 headers: { Accept: "application/json" },
             });
             const json = await res.json();

@@ -128,7 +128,7 @@
       </div>
 
       <div class="modal-body">
-        <form method="post" action="menu/add" enctype="multipart/form-data">
+        <form method="post" action="<%= apiBase %>/api/menu/add" enctype="multipart/form-data">
           <div class="mb-3">
             <label class="form-label"> Nama Menu </label>
             <input type="text" class="form-control" placeholder="Masukkan nama menu" name="nama" required/>
@@ -188,7 +188,7 @@
       </div>
 
       <div class="modal-body">
-        <form method="post" action="menu/edit/0" enctype="multipart/form-data">
+        <form method="post" action="<%= apiBase %>/api/menu/edit/0" enctype="multipart/form-data">
           <input type="hidden" class="form-control" placeholder="Masukkan nama menu" name="id" required/>
           <input type="hidden" class="form-control" placeholder="Masukkan nama menu" name="oldNama" required/>
           <div class="mb-3">

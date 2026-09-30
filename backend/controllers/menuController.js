@@ -1,15 +1,29 @@
 const menuModel = require("../models/menuModel");
 const { formatRupiah } = require("../utils/menuUtils");
 
+const frontendUrl = process.env.FRONTEND_URL || "http://localhost:3000";
+
+function wantsJson(req) {
+    return req.xhr || (req.headers.accept || "").includes("application/json");
+}
+
 async function list(req, res) {
     try {
         const data = await menuModel.getAll();
-        res.render("menu/index", {
-            layout: "layouts/main-layout",
-            activePage: "menu",
-            title: "Halaman Dashboard",
-            menus: data,
-            formatRupiah,
+        // res.render("menu/index", {
+        //     layout: "layouts/main-layout",
+        //     activePage: "menu",
+        //     title: "Halaman Dashboard",
+        //     menus: data,
+        //     formatRupiah,
+        // });
+        res.json({
+            success: true,
+            data: data.map((item, index) => ({
+                ...item,
+                no: index + 1,
+                hargaText: formatRupiah(item.harga),
+            })),
         });
     } catch (error) {
         console.error(error);
@@ -45,7 +59,8 @@ async function add(req, res) {
         // console.log(req.files.foto)
         await menuModel.create(req.body, foto);
         // console.log(req.body)
-        res.redirect("/menu");
+        if (wantsJson(req)) return res.json({ success: true });
+        res.redirect(frontendUrl + "/menu");
     } catch (error) {
         console.error(error);req.files
         res.status(error.status || 500).send(error.message || "Terjadi kesalahan server");
@@ -57,7 +72,8 @@ async function edit(req, res) {
         const foto = req.files && req.files.foto;
         // console.log(req.files)
         await menuModel.update(req.body, foto);
-        res.redirect("/menu");
+        if (wantsJson(req)) return res.json({ success: true });
+        res.redirect(frontendUrl + "/menu");
     } catch (error) {
         console.error(error);
         res.status(500).send("Terjadi kesalahan server");
@@ -67,7 +83,8 @@ async function edit(req, res) {
 async function remove(req, res) {
     try {
         await menuModel.remove(req.params.id);
-        res.redirect("/menu");
+        if (wantsJson(req)) return res.json({ success: true });
+        res.redirect(frontendUrl + "/menu");
     } catch (error) {
         console.error(error);
         res.status(500).send("Terjadi kesalahan server");

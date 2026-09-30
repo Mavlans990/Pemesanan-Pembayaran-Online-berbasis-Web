@@ -18,7 +18,7 @@
 
     function isiFormEdit(d) {
         const form = modalEdit.querySelector("form");
-        if (form) form.action = "/menu/edit/" + d.id_menu;
+        if (form) form.action = (window.API_BASE || "") + "/api/menu/edit/" + d.id_menu;
 
         const setVal = (name, value) => {
             const el = modalEdit.querySelector('[name="' + name + '"]');
