@@ -1,56 +1,47 @@
-# Pesanan — Roadmap & Alur Project
+# Pesanan — Port terpisah
 
-Aplikasi kasir/admin (menu, meja, dll) memakai **Node.js + Express + EJS**, **satu port**. Frontend dan backend folder terpisah, tapi masih satu server.
+Aplikasi kasir/admin (menu, meja) memakai **Node.js + Express + EJS**.
+
+- Frontend (EJS): `http://localhost:3000`
+- Backend API: `http://localhost:4000/api`
 
 ```
-request → routes → controllers → models / utils → render EJS / JSON
+browser → frontend :3000 (HTML)
+                ↓ fetch / form
+         backend :4000 (JSON + upload file)
 ```
 
----
+Admin vs user **belum** dipisah folder. Semua EJS tetap di `frontend/`.
 
-## Alur project sekarang
-
-### Layer
-
-| Layer | Tugas | Contoh |
-|--------|--------|--------|
-| **Route** | URL saja | `GET /menu`, `POST /menu/add`, `GET /menu/search` |
-| **Controller** | Ambil `req` → panggil model → `render` / `redirect` / `json` | `list`, `add`, `edit`, `search` |
-| **Model** | Query DB (CRUD) | `getAll`, `create`, `update`, `remove`, `search` |
-| **Utils** | Bukan DB: format, hash, QR, simpan/hapus file | `formatRupiah`, `saveMenuFoto`, `generateQRCode` |
-
-Nama fungsi boleh sama (`create` di menu dan user) asal dipanggil `menuModel.create` / `userModel.create`.
-
----
-
-## Route menu (acuan)
+## API
 
 | Method | URL | Fungsi |
 |--------|-----|--------|
-| GET | `/menu` | Halaman list |
-| GET | `/menu/search` | JSON filter nama + kategori |
-| POST | `/menu/add` | Tambah (+ foto opsional) |
-| POST | `/menu/edit/:id` | Ubah (foto opsional) |
-| GET | `/menu/delete/:id` | Hapus data + file |
+| GET | `/api/health` | Cek API |
+| GET | `/api/menu` | List menu JSON |
+| GET | `/api/menu/search` | Filter nama + kategori |
+| POST | `/api/menu/add` | Tambah (+ foto opsional) |
+| POST | `/api/menu/edit/:id` | Ubah |
+| GET | `/api/menu/delete/:id` | Hapus data + file |
+| GET/POST | `/api/meja/...` | Pola sama |
 
-Meja mengikuti pola yang sama (`/meja/...`).
+Setelah form add/edit/hapus, backend **redirect** ke `http://localhost:3000/menu` (atau `/meja`).
 
----
-
-## Lanjut (belum dikerjakan di prompt ini)
-
-- Halaman user (CRUD + foto) dengan JS terpisah.
-- Database permanen sudah dipakai; API terpisah 2 port ditunda.
-- Pagination DataTables vs search AJAX (bisa dirapikan nanti).
-- Auth admin.
-
----
+Foto/QR: `frontend/public/img/...` diserve di `http://localhost:4000/img/...`.
 
 ## Jalankan
 
 ```bash
-cd backend
+npm install
+npm run install:all
 npm run dev
 ```
 
-Buka `http://localhost:3000`.
+Atau dua terminal:
+
+```bash
+cd backend && npm run dev
+cd frontend && npm run dev
+```
+
+Salin `backend/.env.example` → `backend/.env` dan `frontend/.env.example` → `frontend/.env`.
