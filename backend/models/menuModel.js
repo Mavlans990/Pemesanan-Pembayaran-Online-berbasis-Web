@@ -26,6 +26,13 @@ async function search(keyword = "", kategori = "") {
     return result;
 }
 
+async function updateStatus(id, is_active) {
+    const status = is_active === "ada" ? "ada" : "habis";
+    const sql = `UPDATE tb_menu SET is_active = ? WHERE id_menu = ?`;
+    const [result] = await db.query(sql, [status, id]);
+    return result;
+}
+
 async function create(colums, file) {
     // data yang di ambil dari post / re
     const dataArray = Array.isArray(colums) ? colums : [colums];
@@ -104,8 +111,9 @@ async function remove(id) {
 
 module.exports = {
     getAll,
-    search,
     create,
     update,
     remove,
+    search,
+    updateStatus,
 };

@@ -39,6 +39,7 @@
         tbody.innerHTML = rows
             .map((menu, index) => {
                 const badgeKategori = menu.kategori === "Makanan" ? "primary" : "dark";
+                const isAda = String(menu.is_active).toLowerCase() === "ada";
                 const favorit =
                     Number(menu.star) === 1
                         ? `<p class="fs-3 mb-0"> ⭐ </p>`
@@ -52,7 +53,17 @@
                 <span class="badge text-bg-${badgeKategori}"> ${escapeHtml(menu.kategori)} </span>
             </td>
             <td>${escapeHtml(menu.hargaText || menu.harga)}</td>
+            <td>${escapeHtml(menu.stok)}</td>
             <td>${favorit}</td>
+            <td>
+                <div class="form-check form-switch">
+                    <input class="form-check-input switch-stok" type="checkbox" role="switch"
+                        id="switch-menu-${menu.id_menu}"
+                        data-id_menu="${menu.id_menu}"
+                        ${isAda ? "checked" : ""}>
+                    <label class="form-check-label" for="switch-menu-${menu.id_menu}">${isAda ? "Ada" : "Habis"}</label>
+                </div>
+            </td>
             <td>
                 <button type="button" class="btn btn-sm btn-success btn-detail" data-bs-toggle="modal" data-bs-target="#modalDetailMenu"
                     data-id_menu="${menu.id_menu}"
@@ -110,6 +121,33 @@
     if (filterKategori) {
         filterKategori.addEventListener("change", cari);
     }
+
+    tbody.addEventListener("change", async function (e) {
+        const sw = e.target.closest(".switch-stok");
+        if (!sw) return;
+
+        const id = sw.dataset.id_menu;
+        const is_active = sw.checked ? "ada" : "habis";
+        const label = sw.parentElement.querySelector("label");
+
+        try {
+            const res = await fetch((window.API_BASE || "") + "/api/menu/status/" + id, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Accept: "application/json",
+                },
+                body: JSON.stringify({ is_active }),
+            });
+            const json = await res.json();
+            if (!json.success) throw new Error(json.message);
+            if (label) label.textContent = json.is_active === "ada" ? "Ada" : "Habis";
+        } catch (err) {
+            console.error(err);
+            sw.checked = !sw.checked;
+            alert("Gagal mengubah status menu");
+        }
+    });
 
     cari();
 })();

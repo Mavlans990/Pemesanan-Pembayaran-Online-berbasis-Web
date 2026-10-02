@@ -10,13 +10,6 @@ function wantsJson(req) {
 async function list(req, res) {
     try {
         const data = await menuModel.getAll();
-        // res.render("menu/index", {
-        //     layout: "layouts/main-layout",
-        //     activePage: "menu",
-        //     title: "Halaman Dashboard",
-        //     menus: data,
-        //     formatRupiah,
-        // });
         res.json({
             success: true,
             data: data.map((item, index) => ({
@@ -34,7 +27,7 @@ async function list(req, res) {
 // Buat fungsi search tanpa load halaman
 async function search(req, res) {
     try {
-        const keyword = req.query.q || "";
+        const keyword = req.query.nama || "";
         const kategori = req.query.kategori || "";
 
         const data = await menuModel.search(keyword, kategori);
@@ -50,6 +43,17 @@ async function search(req, res) {
     } catch (error) {
         console.error(error);
         res.status(500).json({ success: false, message: "Gagal mencari menu" });
+    }
+}
+
+async function setStatus(req, res) {
+    try {
+        const is_active = req.body.is_active === "ada" ? "ada" : "habis";
+        await menuModel.updateStatus(req.params.id, is_active);
+        res.json({ success: true, is_active });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: "Gagal mengubah status menu" });
     }
 }
 
@@ -93,8 +97,9 @@ async function remove(req, res) {
 
 module.exports = {
     list,
-    search,
     add,
     edit,
     remove,
+    search,
+    setStatus,
 };

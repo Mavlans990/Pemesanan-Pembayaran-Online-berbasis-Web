@@ -34,7 +34,7 @@ app.use((req, res, next) => {
 async function fetchApi(pathname) {
   const res = await fetch(apiBase + pathname);
   const json = await res.json().catch(() => ({ success: false, data: [] }));
-  console.log(json.data)
+  // console.log(json.data)
   return json.data || [];
 }
 
