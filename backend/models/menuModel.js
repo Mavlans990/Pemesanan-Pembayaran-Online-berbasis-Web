@@ -49,6 +49,7 @@ async function create(colums, file) {
         item.nama,
         item.deskripsi,
         item.harga,
+        item.stok,
         item.kategori,
         item.star,
         index === 0 ? foto : item.foto || null,
@@ -56,7 +57,7 @@ async function create(colums, file) {
     ]);
 
     const sql = `
-        INSERT INTO tb_menu (nama, deskripsi, harga, kategori, star, foto, path)
+        INSERT INTO tb_menu (nama, deskripsi, harga, stok, kategori, star, foto, path)
         VALUES ?
     `;
     const [result] = await db.query(sql, [values]);
@@ -64,7 +65,7 @@ async function create(colums, file) {
 }
 
 async function update(colums, file) {
-    const { id, nama, kategori, harga, deskripsi, star } = colums;
+    const { id, nama, kategori, harga, stok, deskripsi, star } = colums;
 
     const dataOld = await findById(id);
     // ambil data lama foto dan path
@@ -82,13 +83,14 @@ async function update(colums, file) {
 
     const sql = `
         UPDATE tb_menu
-        SET nama = ?, deskripsi = ?, harga = ?, kategori = ?, star = ?, foto = ?, path = ?
+        SET nama = ?, deskripsi = ?, harga = ?, stok = ?, kategori = ?, star = ?, foto = ?, path = ?
         WHERE id_menu = ?
     `;
     const [result] = await db.query(sql, [
         nama,
         deskripsi,
         harga,
+        stok,
         kategori,
         star,
         foto,

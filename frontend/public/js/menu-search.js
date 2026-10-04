@@ -68,6 +68,7 @@
                 <button type="button" class="btn btn-sm btn-success btn-detail" data-bs-toggle="modal" data-bs-target="#modalDetailMenu"
                     data-id_menu="${menu.id_menu}"
                     data-nama="${escapeHtml(menu.nama)}"
+                    data-deskripsi="${escapeHtml(menu.deskripsi)}"
                     data-path="${escapeHtml(menu.path ? (window.API_BASE || "") + menu.path : "")}">
                     Detail
                 </button>
@@ -78,6 +79,7 @@
                     data-nama="${escapeHtml(menu.nama)}"
                     data-kategori="${escapeHtml(menu.kategori)}"
                     data-harga="${menu.harga}"
+                    data-stok="${menu.stok}"
                     data-star="${menu.star}"
                     data-deskripsi="${escapeHtml(menu.deskripsi)}">
                     Edit
@@ -91,7 +93,7 @@
 
     async function cari() {
         const params = new URLSearchParams({
-            q: input.value.trim(),
+            nama: input.value.trim(),
             kategori: filterKategori ? filterKategori.value : "",
         });
 

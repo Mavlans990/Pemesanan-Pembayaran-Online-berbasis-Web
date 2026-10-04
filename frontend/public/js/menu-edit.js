@@ -25,12 +25,14 @@
             if (el) el.value = value ?? "";
         };
 
+
         setVal("id", d.id_menu);
         setVal("id_menu", d.id_menu);
         setVal("oldNama", d.nama);
         setVal("nama", d.nama);
         setVal("kategori", d.kategori);
         setVal("harga", d.harga);
+        setVal("stok", d.stok);
         setVal("star", d.star);
         setVal("deskripsi", d.deskripsi);
     }
@@ -38,10 +40,12 @@
     function isiFotoDetail(d) {
         const img = modalDetail.querySelector("#foto-detail-menu");
         const judul = modalDetail.querySelector("#nama-detail-menu");
+        const deskripsi = modalDetail.querySelector("#deskripsi-detail-menu");
         const path = d.path;
         // console.log(img)
 
         if (judul) judul.textContent = 'Nama Menu : ' + d.nama || "";
+        if (deskripsi) deskripsi.textContent = d.deskripsi || "";
 
         if (!img) return;
 

@@ -151,6 +151,11 @@
           </div>
 
           <div class="mb-3">
+            <label class="form-label"> Stok </label>
+            <input type="number" class="form-control" placeholder="Masukkan stok" name="stok" required/>
+          </div>
+
+          <div class="mb-3">
             <label class="form-label">Pilih Favorit </label>
             <select class="form-select" name="star">
               <option value="0">No-Favorit 🚫</option>
@@ -213,6 +218,11 @@
           </div>
 
           <div class="mb-3">
+            <label class="form-label"> Stok </label>
+            <input type="number" class="form-control" placeholder="Masukkan stok" name="stok" required/>
+          </div>
+
+          <div class="mb-3">
             <label class="form-label">Pilih Favorit </label>
             <select class="form-select" name="star">
               <option value="0">No-Favorit 🚫</option>
@@ -252,7 +262,14 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body">
-        <p id="nama-detail-menu" class="fw-bold mb-2">Nama Menu</p>
+        <p class="mb-2">
+          <strong>Nama Menu :</strong>
+          <span id="nama-detail-menu"></span>
+        </p>
+        <p class="mb-2">
+          <strong>Deskripsi :</strong>
+          <span id="deskripsi-detail-menu"></span>
+        </p>
         <img id="foto-detail-menu" class="rounded img-fluid" width="250" alt="Foto menu">
       </div>
     </div>

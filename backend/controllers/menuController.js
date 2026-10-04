@@ -7,6 +7,19 @@ function wantsJson(req) {
     return req.xhr || (req.headers.accept || "").includes("application/json");
 }
 
+// function redirectFront(req, res, path) {
+//     const referer = req.get("referer");
+//     if (referer) {
+//         try {
+//         return res.redirect(new URL(referer).origin + path);
+//         } catch (err) {
+//         /* ignore */
+//         }
+//     }
+//     const frontendUrl = process.env.FRONTEND_URL || "http://localhost:3000";
+//     return res.redirect(frontendUrl + path);
+// }
+
 async function list(req, res) {
     try {
         const data = await menuModel.getAll();
