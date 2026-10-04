@@ -4,7 +4,7 @@ const db = require('../config/connect')
 const findAll = async (table) => {
     try {
         // 1. Daftar tabel yang diperbolehkan di database Anda
-        const allowedTables = ['tb_meja', 'tb_menu'];
+        const allowedTables = ['tb_meja', 'tb_menu', 'tb_pesanan'];
 
         // 2. Cek apakah parameter 'table' ada di dalam whitelist
         if (!allowedTables.includes(table)) {

@@ -6,6 +6,7 @@ const fileUpload = require("express-fileupload");
 
 const menuRoutes = require("./routes/menuRoutes");
 const mejaRoutes = require("./routes/mejaRoutes");
+const pesananRoutes = require("./routes/pesananRoutes");
 
 const app = express();
 const port = Number(process.env.PORT) || 4000;
@@ -24,6 +25,7 @@ app.get("/api/health", (req, res) => {
 
 app.use("/api/menu", menuRoutes);
 app.use("/api/meja", mejaRoutes);
+app.use("/api/pesanan", pesananRoutes);
 
 app.use((req, res) => {
     res.status(404).json({ success: false, message: "Route API tidak ditemukan" });

@@ -36,18 +36,6 @@ app.use((req, res, next) => {
   next();
 });
 
-function formatRupiah(angka, withPrefix = true) {
-  if (angka === null || angka === undefined || isNaN(angka)) {
-    return withPrefix ? "Rp 0" : "0";
-  }
-  const formatted = new Intl.NumberFormat("id-ID", {
-    style: "decimal",
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(angka);
-  return withPrefix ? `Rp ${formatted}` : formatted;
-}
-
 async function fetchApi(pathname) {
   const res = await fetch(apiInternal + pathname);
   const json = await res.json().catch(() => ({ success: false, data: [] }));
@@ -90,6 +78,21 @@ app.get("/meja", async (req, res) => {
     title: "Halaman Dashboard",
     mejas,
     msg: req.query.error || "",
+  });
+});
+
+app.get("/pesanan", async (req, res) => {
+  let pesanans = [];
+  try {
+    pesanans = await fetchApi("/api/pesanan");
+  } catch (err) {
+    console.error(err);
+  }
+  res.render("pesanan/index", {
+    layout: "layouts/main-layout",
+    activePage: "pesanan",
+    title: "Halaman Dashboard",
+    pesanans,
   });
 });
 
