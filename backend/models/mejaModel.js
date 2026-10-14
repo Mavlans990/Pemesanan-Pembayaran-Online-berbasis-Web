@@ -2,10 +2,6 @@ const db = require("../config/connect");
 const { findAll } = require("../utils/db");
 const { generateQRCode, deleteFileByPublicPath } = require("../utils/menuUtils");
 
-async function getAll() {
-    return findAll("tb_meja");
-}
-
 async function findOne(nama) {
     try {
         // const db = await connectDB()
@@ -17,6 +13,10 @@ async function findOne(nama) {
         console.error("Query Error:", err);
         throw err;
     }
+}
+
+async function getAll() {
+    return findAll("tb_meja");
 }
 
 async function create(colums) {

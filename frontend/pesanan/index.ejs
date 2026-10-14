@@ -54,14 +54,14 @@
     <div class="card shadow-sm">
       <div class="card-body">
         <div class="d-flex justify-content-between mb-3">
-          <div>
-            <input type="text" class="form-control" placeholder="Cari Meja..." />
+          <div class="col-md-3">
+            <input type="text" id="cari-pesanan" class="form-control" placeholder="Cari kode / tipe / meja / status..." autocomplete="off" />
           </div>
         </div>
 
         <div class="table-responsive">
           <table class="table table-hover align-middle">
-            <thead class="table-light">
+            <thead class="table-primary">
               <tr>
                 <th>No</th>
                 <th>Kode Pesanan</th>
@@ -69,43 +69,12 @@
                 <th>Meja</th>
                 <th>Status</th>
                 <th>Total</th>
+                <th>Aksi</th>
               </tr>
             </thead>
             <!-- untuk edit table ada file pesanan-search.js -->
-            <tbody id="menu-tbody">
-              <% i=1; pesanans.forEach(pesanan =>  {  %>
-              <tr>
-                <td><%= i++ %></td>
-                <td>
-                  <strong><%= pesanan.id_pesanan %></strong>
-                </td>
-                <td>
-                  <span class="badge text-bg-primary">Dine In</span>
-                  <span class="badge text-bg-dark">Take Away</span>
-                </td>
-                <td>
-                  <strong><%= pesanan.id_meja %></strong>
-                </td>
-                <td>
-                  <div class="btn-group btn-group-sm" role="group" aria-label="Basic radio toggle button group">
-                    <input type="radio" class="btn-check" name="btnradio" id="btnradio1" autocomplete="off" checked>
-                    <label class="btn btn-outline-warning" for="btnradio1">Pending</label>
-
-                    <input type="radio" class="btn-check" name="btnradio" id="btnradio2" autocomplete="off">
-                    <label class="btn btn-outline-primary" for="btnradio2">Dibayar</label>
-
-                    <input type="radio" class="btn-check" name="btnradio" id="btnradio3" autocomplete="off">
-                    <label class="btn btn-outline-info" for="btnradio3">Diproses</label>
-
-                    <input type="radio" class="btn-check" name="btnradio" id="btnradio4" autocomplete="off">
-                    <label class="btn btn-outline-success" for="btnradio4">Selesai</label>
-                  </div>
-                </td>
-                <td>
-                  <%= pesanan.totalText %>
-                </td>
-              </tr>
-              <% }); %>
+            <tbody id="pesanan-tbody">
+              
             </tbody>
           </table>
         </div>
@@ -139,9 +108,62 @@
   </main>
 </div>
 
+<!-- ================= MODAL KONFIRMASI STATUS ================= -->
+
+<div class="modal fade" id="modalKonfirmasiStatus" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Ubah Status</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p id="teks-konfirmasi-status" class="mb-0">Ubah status pesanan?</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tidak</button>
+        <button type="button" class="btn btn-primary" id="btn-status-ya" data-bs-dismiss="modal">Ya, ubah</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= MODAL DETAIL ================= -->
+
+<div class="modal fade" id="modalDetailPesanan" tabindex="-1">
+  <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Detail Pesanan</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body py-3 px-5">
+        <p class="mb-3">
+          <strong>Kode pesanan :</strong>
+          <span id="detail-kode-pesanan"></span>
+        </p>
+        <div class="table-responsive">
+          <table class="table table-sm table-hover align-middle">
+            <thead class="table-primary">
+              <tr>
+                <th>No</th>
+                <th>Menu</th>
+                <th>Harga</th>
+                <th>Qty</th>
+                <th>Subtotal</th>
+              </tr>
+            </thead>
+            <tbody id="detail-pesanan-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- ================= MODAL TAMBAH ================= -->
 
-<div class="modal fade" id="modalTambah" tabindex="-1">
+<!-- <div class="modal fade" id="modalTambah" tabindex="-1">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
@@ -167,10 +189,10 @@
 
     </div>
   </div>
-</div>
+</div> -->
 
 <!-- ================= MODAL EDIT ================= -->
-
+<!-- 
 <div class="modal fade" id="modalEditMeja" tabindex="-1">
   <div class="modal-dialog">
     <div class="modal-content">
@@ -199,4 +221,7 @@
 
     </div>
   </div>
-</div>
+</div> -->
+
+<script src="/js/pesanan-search.js"></script>
+<script src="/js/pesanan-edit.js"></script>

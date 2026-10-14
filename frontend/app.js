@@ -85,6 +85,7 @@ app.get("/pesanan", async (req, res) => {
   let pesanans = [];
   try {
     pesanans = await fetchApi("/api/pesanan");
+    // console.log(pesanans)
   } catch (err) {
     console.error(err);
   }

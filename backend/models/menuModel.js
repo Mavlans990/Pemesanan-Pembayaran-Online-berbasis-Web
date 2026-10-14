@@ -2,10 +2,6 @@ const db = require("../config/connect");
 const { findAll } = require("../utils/db");
 const { saveMenuFoto, deleteFileByPublicPath } = require("../utils/menuUtils");
 
-async function getAll() {
-    return findAll("tb_menu");
-}
-
 // Ambil data berdasarkan ID
 async function findById(id) {
     const [result] = await db.query(`SELECT * FROM tb_menu WHERE id_menu = ?`, [id]);
@@ -14,15 +10,15 @@ async function findById(id) {
 
 async function search(keyword = "", kategori = "") {
     let sql = `SELECT * FROM tb_menu WHERE nama LIKE ?`;
-    const params = [`%${keyword}%`];
+    const like = [`%${keyword}%`];
 
     if (kategori && kategori !== "Semua Kategori") {
         sql += ` AND kategori = ?`;
-        params.push(kategori);
+        like.push(kategori);
     }
 
     sql += ` ORDER BY nama ASC`;
-    const [result] = await db.query(sql, params);
+    const [result] = await db.query(sql, like);
     return result;
 }
 
@@ -31,6 +27,10 @@ async function updateStatus(id, is_active) {
     const sql = `UPDATE tb_menu SET is_active = ? WHERE id_menu = ?`;
     const [result] = await db.query(sql, [status, id]);
     return result;
+}
+
+async function getAll() {
+    return findAll("tb_menu");
 }
 
 async function create(colums, file) {
