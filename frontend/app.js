@@ -42,6 +42,10 @@ async function fetchApi(pathname) {
   return json.data || [];
 }
 
+app.get("/", (req, res) => {
+  res.render("user/index", { layout: false });
+});
+
 app.get("/admin", (req, res) => {
   res.render("index", {
     layout: "admin/layouts/main-layout",

@@ -1,6 +1,6 @@
 const mejaModel = require("../models/mejaModel");
 // const flash = require('connect-flash')
-const frontendUrl = process.env.FRONTEND_URL || "http://localhost:3000";
+const frontendUrl = process.env.FRONTEND_URL + "/admin" || "http://localhost:3000/admin";
 
 function wantsJson(req) {
     return req.xhr || (req.headers.accept || "").includes("application/json");
