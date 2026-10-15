@@ -42,38 +42,38 @@ async function fetchApi(pathname) {
   return json.data || [];
 }
 
-app.get("/", (req, res) => {
+app.get("/admin", (req, res) => {
   res.render("index", {
-    layout: "layouts/main-layout",
+    layout: "admin/layouts/main-layout",
     activePage: "home",
     title: "Halaman Dashboard",
   });
 });
 
-app.get("/menu", async (req, res) => {
+app.get("/admin/menu", async (req, res) => {
   let menus = [];
   try {
     menus = await fetchApi("/api/menu");
   } catch (err) {
     console.error(err);
   }
-  res.render("menu/index", {
-    layout: "layouts/main-layout",
+  res.render("admin/menu/index", {
+    layout: "admin/layouts/main-layout",
     activePage: "menu",
     title: "Halaman Dashboard",
     menus,
   });
 });
 
-app.get("/meja", async (req, res) => {
+app.get("/admin/meja", async (req, res) => {
   let mejas = [];
   try {
     mejas = await fetchApi("/api/meja");
   } catch (err) {
     console.error(err);
   }
-  res.render("meja/index", {
-    layout: "layouts/main-layout",
+  res.render("admin/meja/index", {
+    layout: "admin/layouts/main-layout",
     activePage: "meja",
     title: "Halaman Dashboard",
     mejas,
@@ -81,7 +81,7 @@ app.get("/meja", async (req, res) => {
   });
 });
 
-app.get("/pesanan", async (req, res) => {
+app.get("/admin/pesanan", async (req, res) => {
   let pesanans = [];
   try {
     pesanans = await fetchApi("/api/pesanan");
@@ -89,8 +89,8 @@ app.get("/pesanan", async (req, res) => {
   } catch (err) {
     console.error(err);
   }
-  res.render("pesanan/index", {
-    layout: "layouts/main-layout",
+  res.render("admin/pesanan/index", {
+    layout: "admin/layouts/main-layout",
     activePage: "pesanan",
     title: "Halaman Dashboard",
     pesanans,
