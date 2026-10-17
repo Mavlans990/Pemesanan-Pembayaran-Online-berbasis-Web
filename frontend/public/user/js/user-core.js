@@ -38,12 +38,17 @@
         vegetarianOnly: false,
         cart: {},
         mode: "dine",
-        payment: "qr",
-        tableNo: 4,
+        payment: "cash",
+        idMeja: "",
+        nama: "",
+        noHp: "",
+        catatan: "",
+        buktiFile: null,
         favorites: new Set(),
     };
 
     let products = [];
+    let mejas = [];
     let categoryConfig = [{ id: "All", label: "Semua", icon: "grid" }];
     let toastTimer;
 
@@ -128,6 +133,46 @@
             products = [];
         }
         buildCategories();
+        try {
+            const resM = await fetch("/api/meja", { headers: { Accept: "application/json" } });
+            const jsonM = await resM.json();
+            mejas = jsonM.data || jsonM || [];
+            if (!state.idMeja && mejas[0]) state.idMeja = String(mejas[0].id_meja);
+        } catch (err) {
+            mejas = [];
+        }
+    }
+
+    async function checkout() {
+        const items = Object.entries(state.cart)
+            .map(function (entry) {
+                return { id_menu: entry[0], qty: entry[1] };
+            })
+            .filter(function (it) {
+                return it.qty > 0;
+            });
+        if (!items.length) throw new Error("Keranjang kosong");
+        if (state.mode === "dine" && !state.idMeja) throw new Error("Pilih meja");
+        if (state.payment === "qris" && !state.buktiFile) throw new Error("Unggah bukti QRIS");
+
+        const fd = new FormData();
+        fd.append("tipe", state.mode === "takeaway" ? "takeaway" : "dine_in");
+        fd.append("id_meja", state.mode === "takeaway" ? "-" : String(state.idMeja));
+        fd.append("nama", state.nama || "");
+        fd.append("no_hp", state.noHp || "");
+        fd.append("pay", state.payment === "qris" ? "Qris" : "Cash");
+        fd.append("catatan", state.catatan || "");
+        fd.append("items", JSON.stringify(items));
+        if (state.payment === "qris" && state.buktiFile) fd.append("bukti", state.buktiFile);
+
+        const res = await fetch("/api/pesanan/add", {
+            method: "POST",
+            headers: { Accept: "application/json" },
+            body: fd,
+        });
+        const json = await res.json();
+        if (!json.success) throw new Error(json.message || "Gagal checkout");
+        return json.data;
     }
 
     function getProduct(id) {
@@ -178,6 +223,10 @@
         get products() {
             return products;
         },
+        get mejas() {
+            return mejas;
+        },
+        checkout: checkout,
         get categoryConfig() {
             return categoryConfig;
         },

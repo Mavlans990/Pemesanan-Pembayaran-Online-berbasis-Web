@@ -1,6 +1,6 @@
 const db = require("../config/connect");
-const { findAll } = require("../utils/db");
-// const { saveMenuFoto, deleteFileByPublicPath } = require("../utils/menuUtils");
+const { saveBuktiFoto } = require("../utils/pesananUtils");
+const { deleteFileByPublicPath } = require("../utils/menuUtils");
 
 // Ambil data berdasarkan ID
 // async function findById(id) {
@@ -58,25 +58,121 @@ async function getAll() {
     return result;
 }
 
+async function nextKode() {
+    const now = new Date();
+    const y = now.getFullYear();
+    const m = String(now.getMonth() + 1).padStart(2, "0");
+    const d = String(now.getDate()).padStart(2, "0");
+    const prefix = `PSN-${y}${m}${d}-`;
+    const [rows] = await db.query(
+        `SELECT kode_pesanan FROM tb_pesanan WHERE kode_pesanan LIKE ? ORDER BY id_pesanan DESC LIMIT 1`,
+        [`${prefix}%`]
+    );
+    let n = 1;
+    if (rows[0] && rows[0].kode_pesanan) {
+        const parts = String(rows[0].kode_pesanan).split("-");
+        n = (parseInt(parts[2], 10) || 0) + 1;
+    }
+    return prefix + String(n).padStart(3, "0");
+}
+
 async function create(colums, file) {
-    // data yang di ambil dari post / re
-    const dataArray = Array.isArray(colums) ? colums : [colums];
+    const body = Array.isArray(colums) ? colums[0] : colums;
+    let items = body.items;
+    if (typeof items === "string") {
+        items = JSON.parse(items || "[]");
+    }
+    if (!Array.isArray(items) || items.length === 0) {
+        const err = new Error("Keranjang kosong");
+        err.status = 400;
+        throw err;
+    }
 
-    const values = dataArray.map((item, index) => [
-        item.kode_pesanan,
-        item.tipe,
-        item.id_meja,
-        item.status,
-        item.total,
-        item.catatan,
-    ]);
+    const ids = items.map((it) => Number(it.id_menu)).filter(Boolean);
+    const [menus] = await db.query(
+        `SELECT id_menu, harga, is_active FROM tb_menu WHERE id_menu IN (?)`,
+        [ids]
+    );
+    const byId = {};
+    menus.forEach((m) => {
+        byId[m.id_menu] = m;
+    });
 
-    const sql = `
-        INSERT INTO tb_pesanan (kode_pesanan, tipe, id_meja, status, total, catatan)
-        VALUES ?
-    `;
-    const [result] = await db.query(sql, [values]);
-    return result;
+    const detailRows = [];
+    let total = 0;
+    for (const it of items) {
+        const menu = byId[Number(it.id_menu)];
+        const qty = Math.max(1, parseInt(it.qty, 10) || 0);
+        if (!menu || String(menu.is_active).toLowerCase() !== "ada") {
+            const err = new Error("Menu tidak tersedia");
+            err.status = 400;
+            throw err;
+        }
+        const harga = Number(menu.harga) || 0;
+        const subtotal = harga * qty;
+        total += subtotal;
+        detailRows.push([null, Number(it.id_menu), harga, qty, subtotal]);
+    }
+
+    const tipe = body.tipe === "takeaway" ? "takeaway" : "dine_in";
+    const pay = String(body.pay || "Cash") === "Qris" ? "Qris" : "Cash";
+    const idMeja = tipe === "takeaway" ? "-" : String(body.id_meja || "").trim();
+    if (tipe === "dine_in" && !idMeja) {
+        const err = new Error("Pilih meja untuk dine in");
+        err.status = 400;
+        throw err;
+    }
+
+    let buktiFoto = null;
+    let buktiPath = null;
+    if (pay === "Qris") {
+        if (!file) {
+            const err = new Error("Unggah bukti pembayaran QRIS");
+            err.status = 400;
+            throw err;
+        }
+        const saved = await saveBuktiFoto(file);
+        buktiFoto = saved.foto;
+        buktiPath = saved.path;
+    }
+
+    const status = pay === "Qris" && buktiPath ? "dibayar" : "pending";
+    const nama = String(body.nama || "").slice(0, 30);
+    const catatan = String(body.catatan || "");
+    let noHp = parseInt(String(body.no_hp || "").replace(/\D/g, ""), 10);
+    if (!noHp || noHp > 2147483647) noHp = 0;
+
+    const kode = await nextKode();
+    const conn = await db.getConnection();
+    try {
+        await conn.beginTransaction();
+        const [ins] = await conn.query(
+            `INSERT INTO tb_pesanan
+                (kode_pesanan, tipe, id_meja, status, total, nama, no_hp, pay, catatan, bukti_foto, bukti_path)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            [kode, tipe, idMeja, status, total, nama, noHp, pay, catatan, buktiFoto, buktiPath]
+        );
+        const detailValues = detailRows.map((row) => [kode, row[1], row[2], row[3], row[4]]);
+        await conn.query(
+            `INSERT INTO tb_pesanan_detail (kode_pesanan, id_menu, harga, qty, subtotal) VALUES ?`,
+            [detailValues]
+        );
+        await conn.commit();
+        return {
+            id_pesanan: ins.insertId,
+            kode_pesanan: kode,
+            status,
+            total,
+            tipe,
+            pay,
+        };
+    } catch (err) {
+        await conn.rollback();
+        if (buktiPath) await deleteFileByPublicPath(buktiPath);
+        throw err;
+    } finally {
+        conn.release();
+    }
 }
 
 // async function update(colums, file) {
@@ -117,7 +213,7 @@ async function create(colums, file) {
 
 async function remove(id) {
     const [rows] = await db.query(
-        `SELECT kode_pesanan, id_pesanan FROM tb_pesanan WHERE id_pesanan = ?`, [id]
+        `SELECT kode_pesanan, id_pesanan, bukti_path FROM tb_pesanan WHERE id_pesanan = ?`, [id]
     );
     const row = rows[0];
     if (!row) return { affectedRows: 0 };
@@ -125,6 +221,7 @@ async function remove(id) {
     const kode = row.kode_pesanan;
     await db.query(`DELETE FROM tb_pesanan_detail WHERE kode_pesanan = ?`, [kode]);
     const [result] = await db.query(`DELETE FROM tb_pesanan WHERE id_pesanan = ?`, [id]);
+    if (row.bukti_path) await deleteFileByPublicPath(row.bukti_path);
     return result;
 }
 

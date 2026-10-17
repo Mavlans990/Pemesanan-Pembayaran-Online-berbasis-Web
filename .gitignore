@@ -7,3 +7,4 @@ frontend/public/img/menu/*
 frontend/public/img/qrcode/*
 !frontend/public/img/menu/.gitkeep
 !frontend/public/img/qrcode/.gitkeep
+!frontend/public/img/bukti/.gitkeep

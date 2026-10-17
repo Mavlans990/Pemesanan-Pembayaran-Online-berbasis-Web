@@ -77,21 +77,14 @@ Nav admin memakai path `/admin...` (bukan `/`).
 
 ## Halaman user (`GET /`)
 
-- Kerangka HTML di **EJS**; JS terpisah (pola seperti `menu-search.js`).
-- Menu: `fetch("/api/menu")`. Hanya `is_active === "ada"`. Gambar dari `path` API (`/img/menu/...`).
-- Harga **Rupiah** (`id-ID`).
-- **Keranjang lokal** (belum ke DB, belum `POST /api/pesanan/add`). Kode `PSN-...` baru saat checkout (belum dikerjakan).
-- Search / filter kategori **di browser** dari daftar yang sudah di-load (bukan `GET /api/menu/search`).
-- Checkout / QR **belum**.
-
-CSS:
-
-```bash
-cd frontend
-npm run build:css    # Tailwind CLI → public/user/css/style.css
-npm run watch:css
-npm run dev
-```
+- Menu: `GET /api/menu`, hanya `is_active = ada`, gambar `path`, harga Rupiah.
+- Keranjang **lokal** sampai Place order.
+- Tipe order: **Dine in** / **Take away** (Delivery disembunyikan).
+- Nama + no. HP opsional (keduanya). Dine in pilih meja (`id_meja`). Take away `id_meja = "-"`.
+- Bayar: **Cash** / **QRIS**. QRIS: gambar `/img/qrcode/qris.png` + input foto bukti.
+- Total = subtotal item, **tanpa pajak**.
+- Checkout: `POST /api/pesanan/add` (multipart). Kode `PSN-...` baru di server. Item → `tb_pesanan_detail`.
+- Search daftar menu: filter di browser dari list yang sudah di-load.
 
 Sumber class komponen: `user/src/input.css` + `public/user/css/layout.css`. Jangan edit `style.css` hasil generate. Script build memakai `node ./node_modules/tailwindcss/lib/cli.js` (Windows).
 
@@ -99,24 +92,33 @@ Ubah UI: diskusikan dulu + ikut tutor class Tailwind.
 
 ---
 
+## Checkout API
+
+`POST /api/pesanan/add` (JSON atau `multipart/form-data`)
+
+Field: `tipe` (`dine_in` \| `takeaway`), `id_meja`, `nama`, `no_hp`, `pay` (`Cash` \| `Qris`), `catatan`, `items` (JSON: `[{ id_menu, qty }]`).
+
+File QRIS: `bukti` (`req.files.bukti` + `.mv`).
+
+Status: Cash → `pending`; QRIS + bukti → `dibayar`.
+
+SSE admin: `GET /api/pesanan/events` (text/event-stream). Pesanan baru di-broadcast.
+
+---
+
 ## API
 
 | Method | URL | Fungsi |
 |--------|-----|--------|
-| GET | `/api/health` | Cek API |
 | GET | `/api/menu` | List menu |
-| GET | `/api/menu/search` | Filter nama + kategori (**admin**) |
-| POST | `/api/menu/add` | Tambah (+ foto opsional, `req.files.foto` + `.mv`) |
-| POST | `/api/menu/edit/:id` | Ubah |
-| POST | `/api/menu/status/:id` | `is_active`: ada / habis (AJAX) |
-| GET | `/api/menu/delete/:id` | Hapus data + file |
-| GET/POST | `/api/meja/...` | Pola sama; QR filename di-hash |
-| GET | `/api/pesanan` | List + JOIN `tb_meja` |
-| GET | `/api/pesanan/search` | Cari kode / meja / status |
-| GET | `/api/pesanan/detail/:kode` | Item detail + nama menu (`m.id_menu = d.idmenu`) |
-| POST | `/api/pesanan/add` | Ada di API; **belum** dipanggil UI user |
-| POST | `/api/pesanan/status/:id` | Ubah status (AJAX + konfirmasi) |
-| GET | `/api/pesanan/delete/:id` | Hapus header by **id_pesanan**, detail by **kode_pesanan** |
+| GET | `/api/menu/search` | Search admin |
+| POST | `/api/pesanan/add` | Checkout user |
+| GET | `/api/pesanan` | List |
+| GET | `/api/pesanan/search` | Cari |
+| GET | `/api/pesanan/detail/:kode` | Detail item |
+| POST | `/api/pesanan/status/:id` | Ubah status |
+| GET | `/api/pesanan/delete/:id` | Hapus header by id, detail by kode |
+| GET | `/api/pesanan/events` | Notifikasi realtime (SSE) |
 
 Status pesanan: `pending` → `dibayar` → `diproses` → `selesai`  
 Warna: Pending warning, Dibayar primary, Diproses info, Selesai success.
@@ -138,7 +140,7 @@ Postman: JSON, header, port **4000**.
 ```bash
 npm install
 npm run install:all
-npm run dev
+cd frontend && npm run build:css && npm run dev
 ```
 
 `frontend`: `npm run build:css` lalu `npm run dev`. Backend port 4000.
@@ -151,7 +153,5 @@ Jangan commit `node_modules/` (root, `backend/`, `frontend/`) dan `.env`.
 
 ## Ongoing
 
-1. Keranjang belum punya kode. `PSN-...` baru saat checkout / insert `tb_pesanan`.
-2. List menu yg dipesan disimpan di table tb_detail_pesanan
-3. Checkout, QR, POST pesanan dari halaman user — belum.
-4. UI user belum final; ubah setelah diskusi.
+- Delivery
+- Cetak struk

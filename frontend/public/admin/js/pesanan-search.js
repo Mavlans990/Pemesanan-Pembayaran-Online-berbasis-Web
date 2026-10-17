@@ -181,5 +181,6 @@
         timer = setTimeout(cari, 300);
     });
 
+    window.reloadPesananList = cari;
     cari();
 })();

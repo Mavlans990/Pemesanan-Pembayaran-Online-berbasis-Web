@@ -117,7 +117,7 @@
         <div class="cart-header">
           <div>
             <p id="table-title" class="cart-title">Table 04</p>
-            <p class="cart-subtitle"><span id="guest-name">Floyd Miles</span><span class="mx-1.5 text-[#c4cbc5]">•</span><span>2 guests</span></p>
+            <p class="cart-subtitle"><span id="guest-name">Tamu</span></p>
           </div>
           <div class="table-edit-wrap">
             <button class="table-edit-button" type="button" data-action="toggle-table-picker" aria-label="Edit table number" title="Change table">
@@ -128,6 +128,24 @@
         </div>
 
         <div id="order-mode" class="order-mode" role="group" aria-label="Order type"></div>
+
+        <div class="guest-fields">
+          <label>Nama (opsional)
+            <span class="guest-shell">
+              <input id="guest-nama" type="text" maxlength="30" autocomplete="name" placeholder="Nama pemesan" />
+            </span>
+          </label>
+          <label>No. HP (opsional)
+            <span class="guest-shell">
+              <input id="guest-hp" type="tel" inputmode="numeric" placeholder="08xxxxxxxxxx" />
+            </span>
+          </label>
+          <label>Catatan (opsional)
+            <span class="guest-shell">
+              <input id="guest-catatan" type="text" placeholder="Pedas / tanpa es" />
+            </span>
+          </label>
+        </div>
 
         <div class="cart-section-heading">
           <h2>Your order <span id="item-count-badge" class="ml-1 rounded-full bg-brand-50 px-1.5 py-0.5 text-[9px] font-bold text-brand-700"></span></h2>
@@ -142,6 +160,13 @@
             <span>Choose at checkout</span>
           </div>
           <div id="payment-options" class="payment-options" role="group" aria-label="Payment method"></div>
+          <div id="qris-box" class="qris-box hidden">
+            <p class="m-0 mb-2 text-[10px] font-semibold text-[#69756c]">Scan QRIS lalu unggah bukti</p>
+            <img src="/img/qrcode/qris.png" alt="QRIS" />
+            <label class="mt-2 block text-[10px] font-semibold text-[#69756c]">Bukti pembayaran
+              <input id="bukti-qris" type="file" accept="image/png,image/jpeg,image/webp" class="mt-1 w-full text-[11px]" />
+            </label>
+          </div>
         </section>
 
         <button id="place-order" class="place-order-button" type="button" data-action="place-order">

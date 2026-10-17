@@ -1,5 +1,6 @@
 const pesananModel = require("../models/pesananModel");
 const { formatRupiah } = require("../utils/menuUtils");
+const { events, broadcastPesananBaru } = require("../utils/pesananEvents");
 
 const frontendUrl = process.env.FRONTEND_URL + "/admin" || "http://localhost:3000/admin";
 
@@ -90,12 +91,17 @@ async function detail(req, res) {
 
 async function add(req, res) {
     try {
-        await pesananModel.create(req.body);
-        if (wantsJson(req)) return res.json({ success: true });
-        // res.redirect(frontendUrl + "/menu");
+        const bukti = req.files && (req.files.bukti || req.files.foto);
+        const created = await pesananModel.create(req.body, bukti);
+        broadcastPesananBaru(created);
+        return res.json({ success: true, data: created });
     } catch (error) {
-        console.error(error); req.files
-        res.status(500).json({ success: false, message: "Gagal menambah pesanan" });
+        console.error(error);
+        const status = error.status || 500;
+        res.status(status).json({
+            success: false,
+            message: error.message || "Gagal menambah pesanan",
+        });
     }
 }
 
@@ -130,6 +136,7 @@ module.exports = {
     detail,
     add,
     remove,
+    events,
 };
 
 // module.exports = {

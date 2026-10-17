@@ -5,7 +5,6 @@
         const modes = [
             { id: "dine", label: "Dine in" },
             { id: "takeaway", label: "Take away" },
-            { id: "delivery", label: "Delivery" },
         ];
         const el = document.querySelector("#order-mode");
         if (!el) return;
@@ -29,23 +28,25 @@
     function renderTablePicker() {
         const picker = document.querySelector("#table-picker");
         if (!picker) return;
+        const list = U.mejas || [];
         let buttons = "";
-        for (let i = 1; i <= 8; i++) {
-            const active = U.state.tableNo === i;
+        list.forEach(function (meja) {
+            const id = String(meja.id_meja);
+            const active = String(U.state.idMeja) === id;
             buttons +=
                 '<button type="button" data-action="select-table" data-value="' +
-                i +
+                id +
                 '" class="grid h-8 place-items-center rounded-lg border text-[10px] font-bold ' +
                 (active
                     ? "border-brand-500 bg-brand-50 text-brand-700"
                     : "border-[#e8ede8] bg-white text-[#657168]") +
                 '">' +
-                String(i).padStart(2, "0") +
+                String(meja.nama_meja || id) +
                 "</button>";
-        }
+        });
         picker.innerHTML =
-            '<div class="mb-2 flex items-center justify-between"><span class="text-[10px] font-bold text-[#36443a]">Choose a table</span><span class="text-[9px] text-[#9aa39c]">Dining room</span></div><div class="grid grid-cols-4 gap-1.5">' +
-            buttons +
+            '<div class="mb-2 flex items-center justify-between"><span class="text-[10px] font-bold text-[#36443a]">Pilih meja</span></div><div class="grid grid-cols-2 gap-1.5">' +
+            (buttons || "<span class=\"text-[10px] text-muted\">Tidak ada meja</span>") +
             "</div>";
     }
 
@@ -102,23 +103,16 @@
 
     function renderTotals() {
         const subtotal = U.getCartSubtotal();
-        const tax = Math.round(subtotal * 0.05);
-        const total = subtotal + tax;
         document.querySelector("#cart-totals").innerHTML =
-            '<div class="totals-card"><div class="total-row"><span>Subtotal</span><strong>' +
+            '<div class="totals-card"><div class="total-row grand"><span>Total</span><strong>' +
             U.formatCurrency(subtotal) +
-            '</strong></div><div class="total-row"><span>Tax (5%)</span><strong>' +
-            U.formatCurrency(tax) +
-            '</strong></div><div class="total-divider"></div><div class="total-row grand"><span>Total amount</span><strong>' +
-            U.formatCurrency(total) +
             "</strong></div></div>";
     }
 
     function renderPaymentOptions() {
         const options = [
             { id: "cash", label: "Cash", icon: "cash" },
-            { id: "card", label: "Credit / debit", icon: "card" },
-            { id: "qr", label: "QR code", icon: "qr" },
+            { id: "qris", label: "QRIS", icon: "qr" },
         ];
         document.querySelector("#payment-options").innerHTML = options
             .map(function (option) {
@@ -140,16 +134,28 @@
     function renderMobileOrderBar() {
         const count = U.getCartCount();
         const total = U.getCartSubtotal();
-        const tax = Math.round(total * 0.05);
         document.querySelector("#mobile-order-count").textContent =
             count + (count === 1 ? " item" : " items") + " in your basket";
-        document.querySelector("#mobile-order-total").textContent = U.formatCurrency(total + tax);
+        document.querySelector("#mobile-order-total").textContent = U.formatCurrency(total);
         document.querySelector("#mobile-order-button").disabled = count === 0;
     }
 
     U.renderCart = function () {
-        document.querySelector("#table-title").textContent =
-            "Table " + String(U.state.tableNo).padStart(2, "0");
+        const dine = U.state.mode !== "takeaway";
+        const meja = (U.mejas || []).find(function (m) {
+            return String(m.id_meja) === String(U.state.idMeja);
+        });
+        document.querySelector("#table-title").textContent = dine
+            ? meja
+                ? meja.nama_meja
+                : "Pilih meja"
+            : "Take away";
+        const guest = document.querySelector("#guest-name");
+        if (guest) guest.textContent = U.state.nama || "Tamu";
+        const tableWrap = document.querySelector(".table-edit-wrap");
+        if (tableWrap) tableWrap.classList.toggle("hidden", !dine);
+        const qrisBox = document.querySelector("#qris-box");
+        if (qrisBox) qrisBox.classList.toggle("hidden", U.state.payment !== "qris");
         renderModeOptions();
         renderTablePicker();
         renderCartItems();

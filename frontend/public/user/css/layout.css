@@ -716,9 +716,9 @@ select:focus-visible {
 
 .order-mode {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: 1fr 1fr;
     gap: 3px;
-    margin: 15px 0 17px;
+    margin: 15px 0 14px;
     padding: 3px;
     border: 1px solid #e9eeea;
     border-radius: 14px;
@@ -726,12 +726,13 @@ select:focus-visible {
 }
 
 .order-mode button {
-    min-height: 34px;
+    min-height: 36px;
+    width: 100%;
     border: 0;
     border-radius: 11px;
     background: transparent;
     color: #707b73;
-    font-size: 10px;
+    font-size: 11px;
     font-weight: 650;
     white-space: nowrap;
 }
@@ -965,8 +966,73 @@ select:focus-visible {
 
 .payment-options {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: 1fr 1fr;
     gap: 8px;
+}
+
+.guest-fields {
+    display: grid;
+    gap: 10px;
+    margin: 0 0 16px;
+}
+
+.guest-fields label {
+    display: block;
+    margin: 0;
+    color: #69756c;
+    font-size: 10px;
+    font-weight: 650;
+}
+
+.guest-shell {
+    display: flex;
+    min-width: 0;
+    height: 42px;
+    margin-top: 6px;
+    align-items: center;
+    padding: 0 14px;
+    border: 1px solid #ebefeb;
+    border-radius: 15px;
+    background: #fff;
+    box-shadow: 0 3px 12px rgba(31, 48, 36, 0.035);
+    transition: border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.guest-shell:focus-within {
+    border-color: #9ac9a7;
+    box-shadow: 0 0 0 3px rgba(20, 148, 72, 0.08);
+}
+
+.guest-shell input {
+    width: 100%;
+    min-width: 0;
+    border: 0;
+    outline: none;
+    background: transparent;
+    color: #1d2721;
+    font-size: 13px;
+}
+
+.guest-shell input::placeholder {
+    color: #9aa39d;
+}
+
+.qris-box {
+    margin-top: 12px;
+    padding: 12px;
+    border: 1px solid #e9eeea;
+    border-radius: 15px;
+    background: #f8faf8;
+}
+
+.qris-box img {
+    display: block;
+    width: 100%;
+    max-width: 200px;
+    margin: 0 auto;
+    border: 1px solid #e6ebe6;
+    border-radius: 12px;
+    background: #fff;
 }
 
 .payment-option {
@@ -1238,6 +1304,17 @@ select:focus-visible {
 }
 
 @media (max-width: 849px) {
+    .guest-shell,
+    .search-shell {
+        height: 40px;
+        border-radius: 13px;
+    }
+
+    .order-mode button {
+        min-height: 38px;
+        font-size: 12px;
+    }
+
     .menu-intro {
         align-items: flex-start;
     }

@@ -54,9 +54,8 @@
                 document.querySelector("#table-picker").classList.toggle("hidden");
                 break;
             case "select-table":
-                U.state.tableNo = Number(value);
+                U.state.idMeja = String(value);
                 U.renderCart();
-                U.showToast("Now serving Table " + String(U.state.tableNo).padStart(2, "0"));
                 break;
             case "clear-order":
                 U.state.cart = {};
@@ -65,9 +64,22 @@
                 break;
             case "place-order":
                 if (U.getCartCount() === 0) return;
-                U.showToast("Order sent to the kitchen for Table " + String(U.state.tableNo).padStart(2, "0"));
-                U.state.cart = {};
-                U.renderAll();
+                button.disabled = true;
+                U.checkout()
+                    .then(function (data) {
+                        U.state.cart = {};
+                        U.state.buktiFile = null;
+                        const bukti = document.querySelector("#bukti-qris");
+                        if (bukti) bukti.value = "";
+                        U.renderAll();
+                        U.showToast("Pesanan " + (data && data.kode_pesanan ? data.kode_pesanan : "") + " terkirim");
+                    })
+                    .catch(function (err) {
+                        U.showToast(err.message || "Gagal checkout");
+                    })
+                    .then(function () {
+                        button.disabled = U.getCartCount() === 0;
+                    });
                 break;
             case "scroll-to-order": {
                 const panel = document.querySelector("#order-panel");
@@ -90,12 +102,22 @@
             U.state.vegetarianOnly = event.target.checked;
             U.renderMenu();
         }
+        if (event.target.id === "guest-nama") {
+            U.state.nama = event.target.value;
+            const g = document.querySelector("#guest-name");
+            if (g) g.textContent = U.state.nama || "Tamu";
+        }
+        if (event.target.id === "guest-hp") U.state.noHp = event.target.value;
+        if (event.target.id === "guest-catatan") U.state.catatan = event.target.value;
     });
 
     document.addEventListener("change", function (event) {
         if (event.target.id === "sort-select") {
             U.state.sort = event.target.value;
             U.renderMenu();
+        }
+        if (event.target.id === "bukti-qris") {
+            U.state.buktiFile = event.target.files && event.target.files[0] ? event.target.files[0] : null;
         }
     });
 

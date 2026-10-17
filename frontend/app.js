@@ -16,10 +16,21 @@ app.use(expressLayouts);
 app.use(express.static(path.join(__dirname, "public")));
 
 app.use(
+  "/api/pesanan/events",
+  createProxyMiddleware({
+    target: apiInternal,
+    changeOrigin: true,
+    timeout: 0,
+    proxyTimeout: 0,
+  })
+);
+app.use(
   "/api",
   createProxyMiddleware({
     target: apiInternal,
     changeOrigin: true,
+    timeout: 30000,
+    proxyTimeout: 30000,
   })
 );
 app.use(
@@ -54,18 +65,12 @@ app.get("/admin", (req, res) => {
   });
 });
 
-app.get("/admin/menu", async (req, res) => {
-  let menus = [];
-  try {
-    menus = await fetchApi("/api/menu");
-  } catch (err) {
-    console.error(err);
-  }
+app.get("/admin/menu", (req, res) => {
   res.render("admin/menu/index", {
     layout: "admin/layouts/main-layout",
     activePage: "menu",
     title: "Halaman Dashboard",
-    menus,
+    menus: [],
   });
 });
 
@@ -85,19 +90,12 @@ app.get("/admin/meja", async (req, res) => {
   });
 });
 
-app.get("/admin/pesanan", async (req, res) => {
-  let pesanans = [];
-  try {
-    pesanans = await fetchApi("/api/pesanan");
-    // console.log(pesanans)
-  } catch (err) {
-    console.error(err);
-  }
+app.get("/admin/pesanan", (req, res) => {
   res.render("admin/pesanan/index", {
     layout: "admin/layouts/main-layout",
     activePage: "pesanan",
     title: "Halaman Dashboard",
-    pesanans,
+    pesanans: [],
   });
 });
 
