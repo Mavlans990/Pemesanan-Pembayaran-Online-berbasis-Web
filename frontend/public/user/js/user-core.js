@@ -37,9 +37,12 @@
         sort: "popular",
         // vegetarianOnly: false,
         cart: {},
-        mode: "dine",
+        mode: "takeaway",
         payment: "cash",
         idMeja: "",
+        namaMeja: "",
+        mejaSig: "",
+        mejaLocked: false,
         nama: "",
         noHp: "",
         catatan: "",
@@ -139,9 +142,47 @@
             const resM = await fetch("/api/meja", { headers: { Accept: "application/json" } });
             const jsonM = await resM.json();
             mejas = jsonM.data || jsonM || [];
-            if (!state.idMeja && mejas[0]) state.idMeja = String(mejas[0].id_meja);
         } catch (err) {
             mejas = [];
+        }
+        await applyMejaQr();
+    }
+
+    async function applyMejaQr() {
+        const params = new URLSearchParams(window.location.search);
+        let nama = params.get("meja") || "";
+        let sig = params.get("sig") || "";
+        if (!nama || !sig) {
+            try {
+                const saved = JSON.parse(sessionStorage.getItem("mejaQr") || "null");
+                if (saved && saved.nama && saved.sig) {
+                    nama = saved.nama;
+                    sig = saved.sig;
+                }
+            } catch (err) {}
+        }
+        if (!nama || !sig) return;
+        try {
+            const res = await fetch(
+                "/api/meja/scan?meja=" + encodeURIComponent(nama) + "&sig=" + encodeURIComponent(sig),
+                { headers: { Accept: "application/json" } }
+            );
+            const json = await res.json();
+            if (!json.success || !json.data) return;
+            state.mejaLocked = true;
+            state.mode = "dine";
+            state.idMeja = String(json.data.id_meja);
+            state.namaMeja = json.data.nama_meja;
+            state.mejaSig = sig;
+            sessionStorage.setItem(
+                "mejaQr",
+                JSON.stringify({ nama: json.data.nama_meja, sig: sig })
+            );
+            if (window.history && window.history.replaceState) {
+                window.history.replaceState({}, "", window.location.pathname);
+            }
+        } catch (err) {
+            console.error("QR meja:", err);
         }
     }
 
@@ -154,12 +195,14 @@
                 return it.qty > 0;
             });
         if (!items.length) throw new Error("Keranjang kosong");
-        if (state.mode === "dine" && !state.idMeja) throw new Error("Pilih meja");
+        if (state.mode === "dine" && !state.mejaLocked) throw new Error("Dine in wajib scan QR meja");
         if (state.payment === "qris" && !state.buktiFile) throw new Error("Unggah bukti QRIS");
 
         const fd = new FormData();
         fd.append("tipe", state.mode === "takeaway" ? "takeaway" : "dine_in");
         fd.append("id_meja", state.mode === "takeaway" ? "-" : String(state.idMeja));
+        fd.append("nama_meja", state.mode === "takeaway" ? "" : state.namaMeja || "");
+        fd.append("sig", state.mode === "takeaway" ? "" : state.mejaSig || "");
         fd.append("nama", state.nama || "");
         fd.append("no_hp", state.noHp || "");
         fd.append("pay", state.payment === "qris" ? "Qris" : "Cash");

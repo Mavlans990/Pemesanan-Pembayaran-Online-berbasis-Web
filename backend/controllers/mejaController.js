@@ -1,4 +1,5 @@
 const mejaModel = require("../models/mejaModel");
+const { verifyNama } = require("../utils/mejaQr");
 // const flash = require('connect-flash')
 const frontendUrl = process.env.FRONTEND_URL + "/admin" || "http://localhost:3000/admin";
 
@@ -17,6 +18,7 @@ async function list(req, res) {
         //     msg: req.flash('msg')
         // });
         res.json({ success: true, data });
+        // console.log(frontendUrl)
     } catch (error) {
         console.error(error);
         res.status(500).send("Terjadi kesalahan server");
@@ -68,8 +70,30 @@ async function remove(req, res) {
     }
 }
 
+async function scan(req, res) {
+    try {
+        const nama = String(req.query.meja || "").trim();
+        const sig = String(req.query.sig || "").trim();
+        if (!nama || !verifyNama(nama, sig)) {
+            return res.status(403).json({ success: false, message: "QR meja tidak valid" });
+        }
+        const row = await mejaModel.findOne(nama);
+        if (!row) {
+            return res.status(404).json({ success: false, message: "Meja tidak ditemukan" });
+        }
+        res.json({
+            success: true,
+            data: { id_meja: row.id_meja, nama_meja: row.nama_meja },
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: "Gagal cek QR meja" });
+    }
+}
+
 module.exports = {
     list,
     add,
     remove,
+    scan,
 };

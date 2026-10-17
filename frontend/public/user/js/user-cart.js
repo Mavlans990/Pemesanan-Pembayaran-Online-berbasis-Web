@@ -2,10 +2,9 @@
     const U = window.UserPage;
 
     function renderModeOptions() {
-        const modes = [
-            { id: "dine", label: "Dine in" },
-            { id: "takeaway", label: "Take away" },
-        ];
+        const modes = U.state.mejaLocked
+            ? [{ id: "dine", label: "Dine in" }]
+            : [{ id: "takeaway", label: "Take away" }];
         const el = document.querySelector("#order-mode");
         if (!el) return;
         el.innerHTML = modes
@@ -146,14 +145,12 @@
             return String(m.id_meja) === String(U.state.idMeja);
         });
         document.querySelector("#table-title").textContent = dine
-            ? meja
-                ? meja.nama_meja
-                : "Pilih meja"
+            ? U.state.namaMeja || (meja && meja.nama_meja) || "Scan QR meja"
             : "Take away";
         const guest = document.querySelector("#guest-name");
         if (guest) guest.textContent = U.state.nama || "Tamu";
         const tableWrap = document.querySelector(".table-edit-wrap");
-        if (tableWrap) tableWrap.classList.toggle("hidden", !dine);
+        if (tableWrap) tableWrap.classList.add("hidden");
         const qrisBox = document.querySelector("#qris-box");
         if (qrisBox) qrisBox.classList.toggle("hidden", U.state.payment !== "qris");
         renderModeOptions();

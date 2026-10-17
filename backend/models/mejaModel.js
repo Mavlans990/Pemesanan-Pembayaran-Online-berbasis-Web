@@ -1,6 +1,7 @@
 const db = require("../config/connect");
 const { findAll } = require("../utils/db");
 const { generateQRCode, deleteFileByPublicPath } = require("../utils/menuUtils");
+const { orderUrl } = require("../utils/mejaQr");
 
 async function findOne(nama) {
     try {
@@ -21,7 +22,7 @@ async function getAll() {
 
 async function create(colums) {
     const { nama_meja } = colums;
-    const { foto, path: qrPath } = await generateQRCode(nama_meja);
+    const { foto, path: qrPath } = await generateQRCode(orderUrl(nama_meja));
 
     const sql = `INSERT INTO tb_meja (nama_meja, foto, path) VALUES (?, ?, ?)`;
     const [result] = await db.query(sql, [nama_meja, foto, qrPath]);
@@ -53,6 +54,20 @@ async function remove(id) {
     const [result] = await db.query(sql, [id]);
     return result;
 }
+
+// async function regenerateAll() {
+//     const rows = await getAll();
+//     for (const row of rows) {
+//         if (row.path) await deleteFileByPublicPath(row.path);
+//         const saved = await generateQRCode(orderUrl(row.nama_meja));
+//         await db.query(`UPDATE tb_meja SET foto = ?, path = ? WHERE id_meja = ?`, [
+//             saved.foto,
+//             saved.path,
+//             row.id_meja,
+//         ]);
+//     }
+//     return rows.length;
+// }
 
 module.exports = {
     getAll,

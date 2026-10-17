@@ -33,4 +33,9 @@ app.use((req, res) => {
 
 app.listen(port, () => {
     console.log(`Backend API: http://localhost:${port}/api`);
+    // const mejaModel = require("./models/mejaModel");
+    // mejaModel
+    //     .regenerateAll()
+    //     .then((n) => console.log("QR meja di-generate ulang:", n))
+    //     .catch((err) => console.error("Gagal generate ulang QR meja:", err.message));
 });

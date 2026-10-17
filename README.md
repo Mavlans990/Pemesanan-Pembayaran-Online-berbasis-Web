@@ -66,6 +66,7 @@ Alur API: `request → routes → controllers → models / utils → JSON`
 | URL | Halaman |
 |-----|---------|
 | `GET /` | User pesan makanan (`user/index.ejs`, **tanpa** layout admin) |
+| `GET /?meja=Nama&sig=…` | User dine in setelah scan QR meja |
 | `GET /admin` | Dashboard |
 | `GET /admin/menu` | CRUD menu |
 | `GET /admin/meja` | CRUD meja |
@@ -78,17 +79,41 @@ Nav admin memakai path `/admin...` (bukan `/`).
 ## Halaman user (`GET /`)
 
 - Menu: `GET /api/menu`, hanya `is_active = ada`, gambar `path`, harga Rupiah.
-- Keranjang **lokal** sampai Place order.
-- Tipe order: **Dine in** / **Take away** (Delivery disembunyikan).
-- Nama + no. HP opsional (keduanya). Dine in pilih meja (`id_meja`). Take away `id_meja = "-"`.
+- Keranjang **lokal** sampai Place order. Kode `PSN-...` hanya di server saat checkout.
+- **Tanpa scan QR:** hanya **Take away** (`id_meja = "-"`).
+- **Scan QR meja:** hanya **Dine in**, nama meja **terkunci**. Tidak bisa ganti ke take away / ganti meja di UI.
+- Nama + no. HP opsional (keduanya). 
 - Bayar: **Cash** / **QRIS**. QRIS: gambar `/img/qrcode/qris.png` + input foto bukti.
 - Total = subtotal item, **tanpa pajak**.
 - Checkout: `POST /api/pesanan/add` (multipart). Kode `PSN-...` baru di server. Item → `tb_pesanan_detail`.
+- Animasi `animate-slide-in-up` (tw-animations): berurutan saat load; kartu menu ulang saat ganti kategori.
 - Search daftar menu: filter di browser dari list yang sudah di-load.
-
-Sumber class komponen: `user/src/input.css` + `public/user/css/layout.css`. Jangan edit `style.css` hasil generate. Script build memakai `node ./node_modules/tailwindcss/lib/cli.js` (Windows).
+- CSS: Tailwind **v4.3** CLI + `layout.css`.  
+  `cd frontend && npm run build:css`  
+  (`node ./node_modules/@tailwindcss/cli/dist/index.mjs …`). Tema di `user/src/input.css` (`@theme`, `@import "tw-animations"`).
 
 Ubah UI: diskusikan dulu + ikut tutor class Tailwind.
+
+---
+
+## QR meja
+
+Isi PNG **bukan** nama meja mentah, melainkan URL:
+
+`{FRONTEND_URL}/?meja={nama_meja}&sig={hmac}`
+
+- `sig` = HMAC-SHA256 (`QR_SECRET`) atas nama meja, 20 hex. Dicek di **backend** (`GET /api/meja/scan`). Ganti nama di URL tanpa `sig` sah → ditolak.
+- Checkout dine in wajib `nama_meja` + `sig` (bukan hanya `id_meja` di form).
+
+`backend/.env`:
+
+```
+FRONTEND_URL=https://xxxx-3000.devtunnels.ms
+CORS_ORIGIN=https://xxxx-3000.devtunnels.ms
+QR_SECRET=k4nt1n-uduk-2026-x7pQ
+```
+
+Tunnel = port **3000**. `QR_SECRET` hanya di server.
 
 ---
 
@@ -96,13 +121,13 @@ Ubah UI: diskusikan dulu + ikut tutor class Tailwind.
 
 `POST /api/pesanan/add` (JSON atau `multipart/form-data`)
 
-Field: `tipe` (`dine_in` \| `takeaway`), `id_meja`, `nama`, `no_hp`, `pay` (`Cash` \| `Qris`), `catatan`, `items` (JSON: `[{ id_menu, qty }]`).
+Field: `tipe` (`dine_in` \| `takeaway`), `nama`, `no_hp`, `pay` (`Cash` \| `Qris`), `catatan`, `items` (`[{ id_menu, qty }]`).  
+Dine in: `nama_meja` + `sig`. File: `bukti`.
 
-File QRIS: `bukti` (`req.files.bukti` + `.mv`).
+Status: Cash → `pending`; QRIS + bukti → `dibayar`.  
+Insert `tb_pesanan` lalu `tb_pesanan_detail`.
 
-Status: Cash → `pending`; QRIS + bukti → `dibayar`.
-
-SSE admin: `GET /api/pesanan/events` (text/event-stream). Pesanan baru di-broadcast.
+SSE: `GET /api/pesanan/events` — toast admin. Suara opsional: `public/admin/sound/kaching.mp3`.
 
 ---
 
@@ -112,12 +137,14 @@ SSE admin: `GET /api/pesanan/events` (text/event-stream). Pesanan baru di-broadc
 |--------|-----|--------|
 | GET | `/api/menu` | List menu |
 | GET | `/api/menu/search` | Search admin |
+| GET | `/api/meja` | List meja |
+| GET | `/api/meja/scan` | Validasi QR `meja` + `sig` |
 | POST | `/api/pesanan/add` | Checkout user |
 | GET | `/api/pesanan` | List |
 | GET | `/api/pesanan/search` | Cari |
 | GET | `/api/pesanan/detail/:kode` | Detail item |
 | POST | `/api/pesanan/status/:id` | Ubah status |
-| GET | `/api/pesanan/delete/:id` | Hapus header by id, detail by kode |
+| GET | `/api/pesanan/delete/:id` | Header by `id_pesanan`, detail by `kode_pesanan` |
 | GET | `/api/pesanan/events` | Notifikasi realtime (SSE) |
 
 Status pesanan: `pending` → `dibayar` → `diproses` → `selesai`  
@@ -131,7 +158,7 @@ Postman: JSON, header, port **4000**.
 
 - **Menu** — CRUD, foto opsional, switch ada/habis, search AJAX (`menu-search.js`). Pertama buka: list penuh.
 - **Meja** — CRUD, QR hash, hapus file `deleteFileByPublicPath`.
-- **Pesanan** — terpisah dari dashboard. List JOIN meja, search, status radio, detail klik **kode** (`.btn-detail` + `data-kode_pesanan`). Tambah pesanan dari admin **belum**.
+- **Pesanan** — detail klik **kode**. Tambah dari admin belum.
 
 ---
 
@@ -153,5 +180,9 @@ Jangan commit `node_modules/` (root, `backend/`, `frontend/`) dan `.env`.
 
 ## Ongoing
 
+- login admin ada 2 role admin dan kasir
+    admin = bisa manage semua list
+    kasir = hanya buka list pesanan
+- Halaman Pesanan : di detail ada Nama, No, Catatan, Bukti Foto
 - Delivery
 - Cetak struk

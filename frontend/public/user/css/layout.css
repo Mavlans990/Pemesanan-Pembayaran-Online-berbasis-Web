@@ -716,7 +716,7 @@ select:focus-visible {
 
 .order-mode {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr;
     gap: 3px;
     margin: 15px 0 14px;
     padding: 3px;

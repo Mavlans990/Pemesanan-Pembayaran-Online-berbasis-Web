@@ -1,4 +1,6 @@
 const db = require("../config/connect");
+const mejaModel = require("./mejaModel");
+const { verifyNama } = require("../utils/mejaQr");
 const { saveBuktiFoto } = require("../utils/pesananUtils");
 const { deleteFileByPublicPath } = require("../utils/menuUtils");
 
@@ -116,11 +118,22 @@ async function create(colums, file) {
 
     const tipe = body.tipe === "takeaway" ? "takeaway" : "dine_in";
     const pay = String(body.pay || "Cash") === "Qris" ? "Qris" : "Cash";
-    const idMeja = tipe === "takeaway" ? "-" : String(body.id_meja || "").trim();
-    if (tipe === "dine_in" && !idMeja) {
-        const err = new Error("Pilih meja untuk dine in");
-        err.status = 400;
-        throw err;
+    let idMeja = "-";
+    if (tipe === "dine_in") {
+        const namaMeja = String(body.nama_meja || "").trim();
+        const sig = String(body.sig || "").trim();
+        if (!namaMeja || !verifyNama(namaMeja, sig)) {
+            const err = new Error("Dine in wajib scan QR meja");
+            err.status = 400;
+            throw err;
+        }
+        const meja = await mejaModel.findOne(namaMeja);
+        if (!meja) {
+            const err = new Error("Meja tidak ditemukan");
+            err.status = 400;
+            throw err;
+        }
+        idMeja = String(meja.id_meja);
     }
 
     let buktiFoto = null;

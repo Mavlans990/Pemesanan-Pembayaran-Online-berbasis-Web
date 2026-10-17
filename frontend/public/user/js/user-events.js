@@ -47,6 +47,10 @@
                 U.renderMenu();
                 break;
             case "set-mode":
+                if (value === "dine" && !U.state.mejaLocked) {
+                    U.showToast("Dine in: scan QR di meja");
+                    break;
+                }
                 U.state.mode = value;
                 U.renderCart();
                 break;
@@ -58,8 +62,6 @@
                 document.querySelector("#table-picker").classList.toggle("hidden");
                 break;
             case "select-table":
-                U.state.idMeja = String(value);
-                U.renderCart();
                 break;
             case "clear-order":
                 U.state.cart = {};
