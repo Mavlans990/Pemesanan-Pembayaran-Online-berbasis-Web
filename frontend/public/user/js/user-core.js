@@ -35,7 +35,7 @@
         activeCategory: "All",
         query: "",
         sort: "popular",
-        vegetarianOnly: false,
+        // vegetarianOnly: false,
         cart: {},
         mode: "dine",
         payment: "cash",
@@ -45,6 +45,8 @@
         catatan: "",
         buktiFile: null,
         favorites: new Set(),
+        enterAnim: true,
+        animProducts: true,
     };
 
     let products = [];
@@ -104,7 +106,7 @@
             price: Number(item.harga) || 0,
             image: path || placeholderImage(item.nama),
             alt: item.nama || "Foto menu",
-            vegetarian: false,
+            // vegetarian: false,
             badge: Number(item.star) === 1 ? "Favorit" : "",
             popularity: Number(item.star) === 1 ? 1 : 9,
         };

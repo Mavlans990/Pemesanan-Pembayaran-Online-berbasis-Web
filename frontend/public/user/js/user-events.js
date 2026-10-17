@@ -5,7 +5,9 @@
         const categoryButton = event.target.closest("[data-category]");
         if (categoryButton) {
             U.state.activeCategory = categoryButton.dataset.category;
+            U.state.animProducts = true;
             U.renderMenu();
+            U.state.animProducts = false;
             return;
         }
 
@@ -21,7 +23,9 @@
                 break;
             case "reset-category":
                 U.state.activeCategory = "All";
+                U.state.animProducts = true;
                 U.renderMenu();
+                U.state.animProducts = false;
                 break;
             case "toggle-filter": {
                 const popover = document.querySelector("#filter-popover");
@@ -98,10 +102,10 @@
             U.state.query = event.target.value;
             U.renderMenu();
         }
-        if (event.target.id === "vegetarian-only") {
-            U.state.vegetarianOnly = event.target.checked;
-            U.renderMenu();
-        }
+        // if (event.target.id === "vegetarian-only") {
+        //     U.state.vegetarianOnly = event.target.checked;
+        //     U.renderMenu();
+        // }
         if (event.target.id === "guest-nama") {
             U.state.nama = event.target.value;
             const g = document.querySelector("#guest-name");
@@ -148,5 +152,7 @@
 
     U.loadMenus().then(function () {
         U.renderAll();
+        U.state.enterAnim = false;
+        U.state.animProducts = false;
     });
 })();

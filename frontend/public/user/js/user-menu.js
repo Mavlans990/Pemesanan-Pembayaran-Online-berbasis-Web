@@ -6,7 +6,7 @@
         if (!container) return;
         const products = U.products;
         container.innerHTML = U.categoryConfig
-            .map(function (category) {
+            .map(function (category, index) {
                 const count =
                     category.id === "All"
                         ? products.length
@@ -15,10 +15,14 @@
                         }).length;
                 const activeClass = U.state.activeCategory === category.id ? "is-active" : "";
                 const countLabel = count === 1 ? "1 dish" : count + " dishes";
+                const enter = U.state.enterAnim
+                    ? ' animate-slide-in-up" style="animation-delay:' + (120 + index * 70) + 'ms"'
+                    : '"';
                 return (
                     '<button type="button" class="category-tile ' +
                     activeClass +
-                    '" data-category="' +
+                    enter +
+                    " data-category=\"" +
                     category.id +
                     '" aria-pressed="' +
                     (U.state.activeCategory === category.id) +
@@ -36,12 +40,12 @@
             .join("");
     }
 
-    function renderProductCard(product) {
+    function renderProductCard(product, index) {
         const quantity = U.state.cart[product.id] || 0;
         const isFavorite = U.state.favorites.has(product.id);
         const badge = product.badge ? '<span class="product-badge">' + product.badge + "</span>" : "";
-        const dietIcon = product.vegetarian ? U.icon("leaf", "h-3 w-3") : U.icon("meat", "h-3 w-3");
-        const dietText = product.vegetarian ? "Veg" : "Non Veg";
+        // const dietIcon = product.vegetarian ? U.icon("leaf", "h-3 w-3") : U.icon("meat", "h-3 w-3");
+        // const dietText = product.vegetarian ? "Veg" : "Non Veg";
         const cartControl =
             quantity > 0
                 ? '<div class="quantity-control">' +
@@ -62,10 +66,19 @@
                 U.icon("plus", "h-3.5 w-3.5", 2.2) +
                 "<span>Add to dish</span></button>";
 
+        const enter = U.state.animProducts
+            ? " animate-slide-in-up"
+            : "";
+        const delay = U.state.animProducts
+            ? ' style="animation-delay:' + Math.min(index, 12) * 70 + 'ms"'
+            : "";
         return (
             '<article class="product-card ' +
             (quantity > 0 ? "is-in-cart" : "") +
-            '">' +
+            enter +
+            '"' +
+            delay +
+            ">" +
             '<div class="product-image-wrap">' +
             '<img class="product-image" src="' +
             product.image +
@@ -73,13 +86,13 @@
             product.alt +
             '" loading="lazy" />' +
             badge +
-            '<button type="button" class="favorite-button ' +
-            (isFavorite ? "is-favorite" : "") +
-            '" data-action="favorite" data-product-id="' +
-            product.id +
-            '" aria-pressed="' +
-            isFavorite +
-            '">' +
+            // '<button type="button" class="favorite-button ' +
+            // (isFavorite ? "is-favorite" : "") +
+            // '" data-action="favorite" data-product-id="' +
+            // product.id +
+            // '" aria-pressed="' +
+            // isFavorite +
+            // '">' +
             U.icon("heart", "h-4 w-4", isFavorite ? 2.5 : 1.8) +
             "</button></div>" +
             '<h3 class="product-name">' +
@@ -90,10 +103,10 @@
             "</p>" +
             '<div class="product-meta"><span class="product-price">' +
             U.formatCurrency(product.price) +
-            '</span><span class="diet-tag">' +
-            dietIcon +
-            "<span>" +
-            dietText +
+            // '</span><span class="diet-tag">' +
+            // dietIcon +
+            // "<span>" +
+            // dietText +
             "</span></span></div>" +
             cartControl +
             "</article>"
@@ -108,8 +121,8 @@
             const matchesQuery =
                 !query ||
                 (product.name).toLowerCase().indexOf(query) !== -1;
-            const matchesDiet = !U.state.vegetarianOnly || product.vegetarian;
-            return matchesCategory && matchesQuery && matchesDiet;
+            // const matchesDiet = !U.state.vegetarianOnly || product.vegetarian;
+            return matchesCategory && matchesQuery;
         });
 
         if (U.state.sort === "price-low") {
@@ -140,8 +153,6 @@
             U.state.activeCategory === "All" ? "Popular picks" : U.state.activeCategory + " favorites";
         if (U.state.query.trim()) {
             summary.textContent = 'Results for “' + U.state.query.trim() + "”";
-        } else if (U.state.vegetarianOnly) {
-            summary.textContent = "Fresh vegetarian options";
         } else if (U.state.activeCategory === "All") {
             summary.textContent = "A few guest favorites to get you started";
         } else {
